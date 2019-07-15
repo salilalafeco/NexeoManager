@@ -1,0 +1,15 @@
+﻿2019-07-12-12h00:
+- Charger un fichier executable (des mis a jours ) depuis l'onglet "chargement";
+- Afficher le fichier de log : var/log/daemon.log:
+- Synchro. temps chaque seconde sur l'onglet "General"
+
+
+2019-06-18-15h10
+- modification de l'adresse IP 01-eth0
+	ajout d'un timeout pour retarder la modif. du fichier de 1s après l'application du rw
+	
+
+- encapsulation de tout le traitement de la requête http par un try/catch
+
+2019-06-21
+- ajout du setTimeout pour le set de l'id-its, la latitude, la longitude;

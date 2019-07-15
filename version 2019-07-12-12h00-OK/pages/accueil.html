@@ -1,0 +1,4484 @@
+<!doctype html>
+<!--
+  accueil.html
+  Version : rechercher 'idPageRelease' dans ce qui suit pour raffraichir le n° de version sur la page d'accueil
+	- html + javascript
+	- page web d'accueil du NexoManager
+	*/
+-->
+<!-- todo : 
+  - upload spat_mobile.xml
+  - lodifier position statique ds position-provider
+  - LDM:heure absolue ?
+  - feu :ajouter 2 état :inconnu ou éteint
+  - supprimerle reboot
+-->
+<html lang="fr">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--script src="./jquery-3.3.1.min.js"></script-->
+    <script src="./jquery.js"></script>
+
+    <!--link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css"-->
+		<link rel="stylesheet" href="./ol/ol.css" type="text/css">
+		
+		<!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+		<!--script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script-->
+		<!--script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script-->
+    <script src="./ol/ol.js"></script>
+
+    <script src="./utils.js"></script>
+
+    <link rel="stylesheet" href="./bootstrap/bootstrap.min.css">
+    <script src="./bootstrap/bootstrap.min.js"></script>
+    
+    <title>NexoManager-Accueil</title>
+   
+  </head>
+	<style>
+		.WithShape {
+			background: white;
+			box-shadow: 3px 3px 3px 3px #888888;
+			}
+			
+		.OverflowAuto {
+			overflow: auto;
+			}
+			
+		.CaptionCalibri20BlueOnWhite {
+			font-family:	"Calibri";
+			font-weight:	bold;
+			font-size:	20px;
+			color: blue;
+			}
+			
+		.LogInfo {
+			font-family:	"Calibri";
+			font-size:	10px;
+			}
+			
+		.fill {
+			object-fit: fill;
+			}
+			
+		.internal {
+			width: 100%;
+			height: 100%;
+			}
+
+		.classStatusLine {
+			font-family: "Calibri";
+			font-size: 12px;
+			font-weight: normal;
+			}
+
+    .stdText {
+			font-family: "Calibri";
+			font-size: 14px;
+			font-weight: normal;
+			}
+
+    .stdTextAlert {
+      background-color: brown;
+      color: #FFFFFF
+      }
+
+    .stdTextBold {
+			font-family: "Calibri";
+			font-size: 14px;
+			font-weight: bold;
+			}
+			
+		.BorderAll {
+			border: solid 1px #808080;
+			}
+			
+		.center {
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+			width: 60%;
+			}
+
+    /* Style the tab 
+      */
+    .tab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+      padding: 4px 6px;
+      }
+
+    /* Style the buttons that are used to open the tab content */
+    .tab button {
+      background-color: inherit;
+      float: left;
+      font-size:	16px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 4px 6px;
+      transition: 0.3s;
+      }
+
+    /* Change background color of buttons on hover */
+    .tab button:hover {
+      background-color: #ddd;
+      }
+
+    /* Create an active/current tablink class */
+    .tab button.active {
+      background-color: #ccc;
+      box-shadow: 1px 1px 1px 1px #888888;
+      }
+
+    /* Style the tab content */
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+      }
+
+
+
+
+    /* bordure autour */
+    .borderAround {
+			border: solid 1px #808080;
+			}
+
+    .TableNoBorderAround {
+      border: 0px
+      }
+
+    /* toutes les cellules bordée */
+    td, th {
+      border: 1px solid rgba(133, 132, 132, 0.486);
+      border-left: none;
+      border-right: none;
+      /*cursor: pointer;*/
+      }
+
+    .selected {
+      background-color: #229955;
+      color: #000000;
+      }
+
+    .borderedCellUpDown {
+      border: 1px solid rgba(133, 132, 132, 0.486);
+      border-left: none;
+      border-right: none;
+      }
+
+    .borderedCellAll {
+      border: 1px solid rgba(133, 132, 132, 0.486);
+      /*border-left: none;
+      border-right: none;*/
+      }
+
+    table {
+      border-collapse: collapse;
+      }
+
+    .borderedCell { 
+      border-width:1px;
+      border-style:solid; 
+      border-color:grey;
+      }
+
+    .internal {
+			width: 100%;
+			height: 100%;
+			}
+
+    #infoToolTip {
+      position: absolute;
+      height: 1px;
+      width: 1px;
+      z-index: 100;
+      }
+
+    .tooltip.in {
+      opacity: 1;
+      filter: alpha(opacity=100);
+      }
+
+    .tooltip.top .tooltip-arrow {
+      border-top-color: white;
+      }
+
+    .tooltip-inner {
+      border: 2px solid white;
+      }
+      
+    /*body {
+      background-image: url("./medias/background.png");
+      } */
+
+    /* SLIDER ARRONDI */    
+    /* The switch - the box around the slider */
+    .switch {
+      position: absolute;
+      display: inline-block;
+      width: 40px;  /* 60 */
+      height: 24px; /* 34 */
+      }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      }
+
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+      }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px; /* 26 */
+      width: 20px;  /* 26 */
+      left: 2px;  /* 4 */
+      bottom: 2px;  /* 4 */
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+      }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+      }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+      }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(18px);  /* 26 */
+      -ms-transform: translateX(18px);  /* 26 */
+      transform: translateX(18px);  /* 26 */
+      }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 20px;  /* 24 */
+      }
+
+    .slider.round:before {
+      border-radius: 50%;
+      } 
+
+  /*********
+    for rounded button
+    */
+    input.rounded {
+
+      border: 1px solid #ccc;
+      
+      /* Safari 5, Chrome support border-radius without vendor prefix.
+      * FF 3.0/3.5/3.6, Mobile Safari 4.0.4 require vendor prefix.
+      * No support in Safari 3/4, IE 6/7/8, Opera 10.0.
+      */
+      -moz-border-radius: 4px;
+      -webkit-border-radius: 4px;
+      border-radius: 4px;
+
+      /* Chrome, FF 4.0 support box-shadow without vendor prefix.
+      * Safari 3/4/5 and FF 3.5/3.6 require vendor prefix.
+      * No support in FF 3.0, IE 6/7/8, Opera 10.0, iPhone 3.
+      * change the offsets, blur and color to suit your design.
+      */
+      -moz-box-shadow: 2px 2px 3px #666;
+      -webkit-box-shadow: 2px 2px 3px #666;
+      box-shadow: 2px 2px 3px #666;
+
+      /* using a bigger font for demo purposes so the box isn't too small */
+      /* font-size: 20px;*/
+
+      /* with a big radius/font there needs to be padding left and right
+      * otherwise the text is too close to the radius.
+      * on a smaller radius/font it may not be necessary
+      */
+      padding: 4px 7px;
+
+      /* only needed for webkit browsers which show a rectangular outline;
+      * others do not do outline when radius used.
+      * android browser still displays a big outline
+      */
+      outline: 0;
+
+      /* this is needed for iOS devices otherwise a shadow/line appears at the
+      * top of the input. depending on the ratio of radius to height it will
+      * go all the way across the full width of the input and look really messy.
+      * ensure the radius is no more than half the full height of the input, 
+      * and the following is set, and everything will render well in iOS.
+      */
+      -webkit-appearance: none;
+      }
+
+    input.rounded:focus {
+
+      /* supported IE8+ and all other browsers tested.
+      * optional, but gives the input focues when selected.
+      * change to a color that suits your design.
+      */
+      border-color: #339933;
+      }
+
+  </style>
+  
+  <body>
+    <div id="header" class="WithShape OverflowAuto " style="height:30px;" >
+      <label class="CaptionCalibri20BlueOnWhite">    NEXO MaintenanceManager</label>
+      <label id="idPageRelease" class="stdText"> version 2019/07/12-12h00</label>
+    </div>
+
+    <audio id="sound_nok" src="./medias/boop.wav" ></audio>
+    <audio id="sound_ok" src="./medias/ding.wav" ></audio>
+
+    <br>
+		
+    <div id="mainTab" class="tab tab_main">
+        <div class="mainTabs OverflowAuto" style="height: 30px;">
+          <button id="idTabGeneral" class="tablinks tab_main rounded" style="height:25px; vertical-align: middle;" onclick="openTab(event, 'tab_main', 'tabGeneral',null)">Général</button>
+          <button id="idTabCommands" class="tablinks tab_main rounded"style="height:25px; vertical-align: middle;"  onclick="openTab(event, 'tab_main', 'tabCommands',null)">Commandes</button>
+          <button id="idTabUpload" class="tablinks tab_main rounded"style="height:25px; vertical-align: middle;"  onclick="openTab(event, 'tab_main', 'tabUpload',null)">Chargements</button>
+          <button id="idTabVisu" class="tablinks tab_main rounded" style="height:25px; vertical-align: middle;" onclick="openTab(event, 'tab_main', 'tabVisu',openTabPostAction)">Visualisation</button>
+        </div>
+        
+        <div id="tabGeneral" class="tabcontent tab_main WithShape">          
+          <table>
+            <tr>
+              <td style="width:40%;">
+                <div class="OverflowAuto">
+                  <table class="stdTextBold TableNoBorderAround" style=" border-collapse: collapse;">
+                    <caption style="text-align:center;">Identité:</caption>
+                    <tr>
+                      <td style="width:200px;">Identifiant de Station</td>
+                      <td id="IdCurrentStationId" style="width:150px;">-</td>
+                    </tr>
+                    <tr>
+                      <td style="width:200px;">Type de Station</td>
+                      <td id="IdCurrentStationType" style="width:150px;">-</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <br>
+        
+                <div class="OverflowAuto ">
+                  <table class="stdTextBold TableNoBorderAround" style=" border-collapse: collapse;">
+                    <caption style="text-align:center;">Canaux de Communication:</caption>
+                    <tr>
+                      <td style="width:100px;">Connecté</td>
+                      <td style="width:200px;">Canal</td>
+                      <td style="width:150px;">Fonctionnel</td>
+                    </tr>
+                    <tr>
+                      <td><label id="idOwnCAM_connected">non</label></td>
+                      <td><label id="idOwnCAM_message">CAM générés</label></td>
+                      <td><label id="idOwnCAM_oper">non</label></td>
+                    </tr>
+                    <tr>
+                      <td><label id="idInCAM_connected">non</label></td>
+                      <td><label id="idInCAM_message">CAM reçus</label></td>
+                      <td><label id="idInCAM_oper">non</label></td>
+                    </tr>
+                    <tr>
+                      <td><label id="idOwnSPAT_connected">non</label></td>
+                      <td><label id="idOwnSPAT_message">SPAT générés</label></td>
+                      <td><label id="idOwnSPAT_oper">non</label></td>
+                    </tr>
+                    <tr>
+                      <td><label id="idInSPAT_connected">non</label></td>
+                      <td><label id="idInSPAT_message">SPAT reçus</label></td>
+                      <td><label id="idInSPAT_oper">non</label></td>
+                    </tr>
+                    <tr>
+                      <td><label id="idOwnMAP_connected">non</label></td>
+                      <td><label id="idOwnMAP_message">MAP générés</label></td>
+                      <td><label id="idOwnMAP_oper">non</label></td>
+                    </tr>
+                    <tr>
+                      <td><label id="idInMAP_connected">non</label></td>
+                      <td><label id="idInMAP_message">MAP reçus</label></td>
+                      <td><label id="idInMAP_oper">non</label></td>
+                    </tr>
+                    <tr>
+                      <td><label id="idLDMInfoCAM_connected">non</label></td>
+                      <td><label id="idLDMInfoCAM_message">informations LDM CAM</label></td>
+                      <td><label id="idLDMInfoCAM_oper">non</label></td>
+                    </tr>                  
+                    <!--tr>
+                      <td><label id="idLDMInfoDENM_connected">non</label></td>
+                      <td><label id="idLDMInfoDENM_message">informations LDM DENM</label></td>
+                      <td><label id="idLDMInfoDENM_oper">non</label></td>
+                    </tr>                  
+                    <tr>
+                      <td><label id="idLDMInfoSPATMAP_connected">non</label></td>
+                      <td><label id="idLDMInfoSPATMAP_message">informations LDM SPAT-MAP</label></td>
+                      <td><label id="idLDMInfoSPATMAP_oper">non</label></td>
+                    </tr-->                  
+                  </table>
+                </div>
+
+                </br>
+
+                <!-- position de la station courante -->
+                <div class="OverflowAuto ">
+                  <table class="stdTextBold TableNoBorderAround" style="border-collapse: collapse;">
+                    <caption style="text-align:center;">Position géographique:</caption>
+                    <tr class="stdTextBold">
+                      <td style="width:150px;">Latitude</td>
+                      <td style="width:150px;">Longitude</td>
+                      <td style="width:150px;">Altitude</td>
+                      <td style="width:100px;">Direction</td>
+                      <td style="width:100px;">Synchro. temp.</td>
+                    </tr>
+                    <tr class="stdText">
+                      <td><label id="idLatitude">-</label></td>
+                      <td><label id="idLongitude">-</label></td>
+                      <td><label id="idAltitude">-</label></td>
+                      <td><label id="idDirection">-</label></td>
+                      <td><label id="idTimeOffset" style="text-align:right;">-</label></td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+
+              <td style="width:60%;">
+                <table>
+                  <tr>
+                    <td>
+                      <!-- etat des feux -->
+                      <div class="OverflowAuto">
+                        <table  class="borderAround">
+                          <caption style="text-align:center;" class="stdTextBold">Etat des feux:</caption>
+                          <tr>
+                            <td>
+                              <label class="stdText">SPaT reçus:</label> 
+                              <label>   </label>
+                              <label class="switch" >
+                                <input type="checkbox" id="chkSpatRecu" onchange="chkSpatRecu_onchange()">
+                                <span class="slider round"></span>
+                              </label> 
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <!-- 400px -->
+                            <td style="width:450px;">
+                              <label id="idSpatInfo" class="stdText" style="height:300px;"></label>
+                            </td>
+                            <td style="width:500px;" class="borderedCellAll">
+                              <div id="idFeuxArea">
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <!-- évènements -->
+                      <div class="OverflowAuto">
+                        <label id="idEvenementsCaption" onclick="clearEvenementsList(event);" style="text-align:center;" class="stdTextBold">Evènements:</label>
+                        <br>
+                        <div class="borderedCellAll">
+                          <select id="logLDMEvents" size="10" class="OverflowAuto stdText" 
+                            style="width:100%; overflow-y:scroll; background-image:linear-gradient(to bottom, #EEEEEE, #FFFFFF); " > </select>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- commandes possibles -->
+        <div id="tabCommands" class="tabcontent tab_main WithShape">
+          <table class="TableNoBorderAround">
+            <caption style="text-align:center;" class="stdTextBold">Liste des commandes:</caption>
+
+            <tr>
+              <td  style="width:200px;">
+                <label class="stdText">Redémarrer NEXO:</label>
+              </td>
+              <td  style="width:420px;"></td>
+              <td style="width:120px;"></td>
+              <td style="width:120px;">
+                <input id="idButtonReboot" type="button" style="width:100%;" class="stdText rounded" value="redémarrer"></input>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <label class="stdText">Forcer la DATE:</label>
+              </td>
+              <td></td>
+              <td></td>
+              <td>
+                <input id="idButtonForceDate" type="button" style="width:100%;" class="stdText rounded" value="Forcer"></input>
+              </td>
+            </tr>
+
+            <tr>
+                <td>
+                  <label class="stdText">Arrêter proprement NEXO:</label>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                  <input id="idButtonStop" type="button" style="width:100%;" class="stdText rounded" value="Arrêter"></input>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                  <label class="stdText">Redémarrer MIDDLEWARE:</label>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                  <input id="idButtonMiddleWareRestart" type="button" style="width:100%;" class="stdText rounded" value="redémarrer"></input>
+                </td>
+            </tr>
+          
+            <tr>
+              <td>
+                <label class="stdText">Lire tout:</label>
+              </td>
+              <td>
+                
+              </td>
+              <td>
+                <input id="idButtonGetAll" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+              </td>
+              <td></td>
+            </tr>
+
+            <tr>
+                <td>
+                  <label class="stdText">Version du MIDDLEWARE:</label>
+                </td>
+                <td>
+                  <input id="idTextMiddlewareRelease" type="text" class="stdText" value="" style="text-align:center;width:90%;" readonly></input>
+                </td>
+                <td>
+                  <input id="idButtonMiddleWareVersionGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+                </td>
+                <td></td>
+            </tr>
+           
+            <tr>
+                <td>
+                  <label class="stdText">Version du module SPAT:</label>
+                </td>
+                <td>
+                  <input id="idTextSpatMapRelease" type="text" class="stdText" value="" style="text-align:center;width:90%;" readonly></input>
+                </td>
+                <td>
+                  <input id="idButtonSpatVersionGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+                </td>
+                <td></td>
+            </tr>
+
+            <tr style="height:25px;"></tr>
+        
+            <tr>
+                <td>
+                  <label class="stdText">Numéro de Station C-ITS:</label>
+                </td>
+                <td>
+                  <input id="idTextStationIdInput" type="text" class="" placeholder="its_station_id" value="" style="text-align:center;width:90%;"></input>
+                </td>
+                <td>
+                  <input id="idButtonStationIdGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+                </td>
+                <td>
+                  <input id="idButtonStationIdSet" type="button" style="width:100%;" class="stdText rounded" value="modifier"></input>
+                </td>
+              </tr>
+
+            <tr style="height:25px;"></tr>
+       
+            <!-- latitude & longitude -->
+            <tr>
+              <td>
+                <label class="stdText">Modifier la latitude fixe:</label>
+              </td>
+              <td>
+                <input id="idTextStationLatitudeInput" type="text" class="" placeholder="latitude en décimal" value="" style="text-align:center;width:90%;"></input>
+              </td>
+              <td>
+                <input id="idButtonLatitudeGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+              </td>
+              <td>
+                <input id="idButtonLatitudeSet" type="button" style="width:100%;" class="stdText rounded" value="modifier"></input>
+              </td>
+            </tr>        
+
+            <tr>
+              <td>
+                <label class="stdText">Modifier la longitude fixe:</label>
+              </td>
+              <td>
+                <input id="idTextStationLongitudeInput" type="text" class="" placeholder="longitude en décimal" value="" style="text-align:center;width:90%;"></input>
+              </td>
+              <td>
+                <input id="idButtonLongitudeGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+              </td>
+              <td>
+                <input id="idButtonLongitudeSet" type="button" style="width:100%;" class="stdText rounded" value="modifier"></input>
+              </td>
+            </tr>
+
+            <tr style="height:25px;"></tr>
+
+            <tr>
+              <td>
+                <label class="stdText">Réseau filaire:</label>
+              </td>
+              <td>
+                <input id="idIpFixe" type="text" placeholder="xxx.xxx.xxx.xxx" class="stdText" style="text-align:center;width:30%;"></input>
+                <input id="idMaskFixe" type="text" placeholder="255.255.255.0" class="stdText" style="text-align:center;width:30%;"></input>
+                <input id="idGatewayFixe" type="text" placeholder="xxx.xxx.xxx.xxx" class="stdText" style="text-align:center;width:30%;"></input>
+              </td>
+              <td>
+                <input id="idButtonIpFixeGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+              </td>
+              <td>
+                <input id="idButtonIpFixeSet" type="button" style="width:100%;" class="stdText rounded" value="modifier"></input>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <label class="stdText">Lire le nom de machine:</label>
+              </td>
+              <td>
+                <input type="text" class="stdText" id="idHostname" style="text-align:center;width:90%;" readonly></input>
+              </td>
+              <td>
+                <input id="idButtonHostameGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+              </td>
+              <td></td>
+            </tr>
+
+
+            <tr>
+              <td>
+                <label class="stdText">Lire la température:</label>
+              </td>
+              <td>
+                <input type="text" class="stdText" id="idTemperature" style="text-align:center;width:90%;" readonly></input>
+              </td>
+              <td>
+                <input id="idButtonTemperatureGet" type="button" style="width:100%;" class="stdText rounded" value="lire"></input>
+              </td>
+              <td></td>
+            </tr>
+
+          </table>          
+        </div>
+
+        <!-- telechargement de fichiers -->
+		
+		<div>
+            <form action="execFilesToUpload" id="execFilesToUpload" method="post" enctype="multipart/form-data" class="WithShape" style="width:800px;">
+              <label class="stdTextBold">Chargement du fichiers mise à jour:</label>
+              <input type="file" name="theFile" style="width: 700px;">
+              <input type="submit" class="stdText rounded" value="Upload" >
+              <label id="execFilesToUploadReport" class="stdText">-</label>
+            </form>
+          </div>
+		
+		
+		<!--  --->
+        <div id="tabUpload" class="tabcontent tab_main WithShape" style="width: 1200px; ">
+          <label class="stdTextBold">Chargement de fichier dans le NEXO (Upload):</label>
+          <div style="width:800px;">
+            <input id="idStopServiceSpat" type="button" style="width:150px;" class="stdText rounded" value="Arrêt SPAT"></input>
+            <br>
+            <input id="idStartServiceSpat" type="button" style="width:150px;" class="stdText rounded" value="Démarrage SPAT"></input>
+          </div>
+          <div>
+            <form action="spatModuleParamToUpload" id="spatModuleParamToUpload" method="post" enctype="multipart/form-data" class="WithShape" style="width:800px;">
+              <label class="stdTextBold">Chargement du paramétrage spat_mobile_params.xml:</label>
+              <input type="file" name="theFile" style="width: 700px;">
+              <input type="submit" class="stdText rounded" value="Upload" >
+              <label id="spatModuleParamToUploadReport" class="stdText">-</label>
+            </form>
+          </div>
+          <br>
+
+          <div>
+            <form action="mapFileToUpload" id="mapFileToUpload" method="post" enctype="multipart/form-data" class="WithShape" style="width:800px;">
+              <label class="stdTextBold">Chargement du fichier map_params.json :</label>
+              <input type="file" name="theFile" style="width: 700px;">
+              <input type="submit" value="Upload" >
+              <label id="mapFileToUploadReport" class="stdText">-</label>
+            </form>
+          </div>
+          <br>
+
+          <div>
+            <form action="spatProgToUpload" id="spatProgToUpload" method="post" enctype="multipart/form-data" class="WithShape" style="width:800px;">
+              <label class="stdTextBold">Chargement du fichier spat_mobile_appli :</label>
+              <input type="file" name="theFile" style="width: 700px;">
+              <input type="submit" value="Upload" >
+              <label id="spatProgToUploadReport" class="stdText">-</label>
+            </form>
+          </div>
+          <br>
+
+          <label class="stdTextBold">Chargement de fichier depuis le NEXO (download) :</label>
+          <div class="WithShape" style="width:800px;">
+            <label>spat_mobile_params.xml:</label>
+            <input type="button" id="spatModuleParamToDownload" class="stdText rounded" value="Download"></input>
+          </div>
+          <br>
+
+          <div class="WithShape" style="width:800px;">
+            <label>map_params.json.xml:</label>
+            <input type="button" id="mapFileToDownload" class="stdText rounded" value="Download"></input>
+          </div>
+          <br>
+
+          <div class="WithShape" style="width:800px;">
+            
+            <label>Octets à extraire:</label>
+            <input type="text" id="idLogSizeToDownload" value="10000"></input>
+            <br>
+            <label>/var/log/syslog:</label>
+            <input type="button" id="syslogToDownload" class="stdText rounded" value="Download">    </input>
+            <br>
+            <label>/var/log/debug:</label>
+            <input type="button" id="var_log_debuglogToDownload" class="stdText rounded" value="Download">    </input>
+            <br>
+            <label>/var/log/daemon.log:</label>
+            <input type="button" id="daemonlogToDownload" class="stdText rounded" value="Download">    </input>
+            <br>
+            <label>/var/run/spat_mobile_infos.json:</label>
+            <input type="button" id="spatMobileInfosToDownload" class="stdText rounded" value="Download">    </input>
+          </div>
+          
+        </div>
+
+        <!-- tableau des stations et vehicules détectés -->
+        <div id="tabVisu" class="tabcontent tab_main WithShape" style="width: 1200px; ">
+          <div id="stationDiv" class="WithShape stdText" style="width: 1170px; height: 125px;">
+            <table id="stationTable" class="borderedCellUpDown" style="overflow-y:scroll;">
+              <tr>
+                <td class="stdTextBold" style="width:120px; text-align: center;">Identifiant</td>
+                <td class="stdTextBold" style="width:90px; text-align: center;">Type</td>
+                <td class="stdTextBold" style="width:60px; text-align: center;">Signal</td>
+                <td class="stdTextBold" style="width:400px; text-align: center;">Position</td>
+                <td class="stdTextBold" style="width:80px; text-align: center;">Vitesse</td>
+                <td class="stdTextBold" style="width:100px; text-align: center;">Distance</td>
+                <td class="stdTextBold" style="width:100px; text-align: center;">Direction</td>
+                <td class="stdTextBold" style="width:160px; text-align: left;">Quand</td>
+              </tr>
+            </table>
+          </div>
+          <br>
+
+        <div id="tabToolBox" class="tab tab_toolbox" style="width: 1200px; ">
+          <div class="mainTabs OverflowAuto" style="height: 30px;">
+          <button id="idTabMesures" class="tablinks tab_toolbox" style="height:25px; vertical-align: middle;" onclick="openTab(event, 'tab_toolbox', 'tabMesures',null)">Mesures de signal</button>
+          <!--button id="idTabZones" class="tablinks tab_toolbox"style="height:25px; vertical-align: middle;"  onclick="openTab(event, 'tab_toolbox', 'tabZones',null)">Zones de détection</button-->
+          <button id="idTabLignesPrio" class="tablinks tab_toolbox"style="height:25px; vertical-align: middle;"  onclick="openTab(event, 'tab_toolbox', 'tabLignesPrio',null)">Lignes de Priorité</button>
+          </div>
+
+          <div id="tabMesures" class="tabcontent tab_toolbox WithShape" style="width: 1180px; ">
+            <!-- toolbox pour manipuler les mesures de LDM-->
+            <div id="tabVisuMeasures" style="width: 1170px;">
+              <label class="stdTextBold">Mesures : </label>
+              <input type="button" id="btnMeasuresClear" class="stdText rounded" value="Effacer"></input> 
+              <label class="stdText">Intervalle inter-msg. LDM (ms) : </label>
+              <input type="text" id="idDelayMsLDM" value="1000"></input>
+              <input type="button" id="btnMeasuresOn" class="stdText rounded" value="Enregistrer"></input> 
+              <input type="checkbox" id="chkMeasuresOn"  style="background: white;"></input> 
+              <input type="button" id="btnMeasuresOff" class="stdText rounded" value="Stop"></input>
+              <input type="button" id="btnMeasuresSave" class="stdText rounded" value="Sauvegarder"></input>
+              <input type="button" id="btnMeasuresLoad" class="stdText rounded" value="Recharger"></input>
+              <label id="idMeasuresCount">-</label>
+              <input type="button" id="idBtnRedrawStations" class="stdText rounded" value="Redessiner"></input>
+              <input style="display:none;" id="procMeasuresLoad" type='file' accept=".json">
+              <!-- onchange='openMeasuresFile(event)' -->
+            </div>
+
+            <!-- stations captées lors des mesures-->
+            <div id="idMeasures" style="width:100%;" style="width: 1170px;">
+              <table class="borderedCell fill">
+                <tr style="height:30px; width:800px; min-width: 200px;">
+                <td id="idMesureStations" class="borderedCell fill" >                    
+                </td>
+                </tr>
+              </table>
+            </div>
+          </div id="end_tabMeasures">
+
+          <!-- outil pour dessiner des polygones >
+          <div id="tabZones" class="tabcontent tab_toolbox WithShape" style="width: 1180px; ">
+            <div id="tabZonesToolbox" style="width: 1170px;">
+              <input type="button" id="btnZonesClear" value="Effacer zones" class="stdText rounded" onclick="btnZonesClear_onclick(event);"></input> 
+              <input type="button" id="btnZoneAdd" value="Créer zone" class="stdText rounded" onclick="btnZoneAdd_onclick(event);"></input> 
+              <label class="stdText">Identifiant : </label>
+              <input type="text" id="idZoneId" placeholder="id" value="" style="width:60px; text-align:center;"></input>
+              <input type="text" id="idZoneRegion" placeholder="region" value="" style="width:60px; text-align:center;"></input>
+              <label class="stdText">Signal : </label>
+              <input type="text" id="idZoneSignalGroup" placeholder="ligne de feu" value="" style="width:80px; text-align:center;"></input>
+              <input type="button" id="btnZoneValid" value="Valider zone" class="stdText rounded" onclick="btnZoneValid_onclick(event);"></input>
+              <input type="button" id="btnZoneCancel" value="Annuler zone" class="stdText rounded" onclick="btnZoneCancel_onclick(event);"></input>
+              <input type="button" id="btnZoneUpdate" value="M.à.J." class="stdText rounded" onclick="btnZoneUpdate_onclick(event);"></input>
+              <input type="button" id="btnZoneSup" value="Supprimer zone" class="stdText rounded" onclick="btnZoneSup_onclick(event);"></input>
+              <input type="button" id="btnZonesSave" class="stdText rounded" value="Sauvegarder"></input>
+              <input type="button" id="btnZonesLoad" class="stdText rounded" value="Recharger"></input>
+              <input style="display:none;" id="procZonesLoad" type='file' accept=".json">
+              <... onchange='openZonesFile(event)' ...>
+            </div>
+          </div id="end_tabZones"-->
+
+          <!-- affichage des lignes de demande de priorité-->
+          <div id="tabLignesPrio" class="tabcontent tab_toolbox WithShape" style="width: 1180px; ">
+            <div id="tabLignesPrioToolbox" style="width: 1170px;">
+              <input type="button" id="btnLignesPrioReload" class="stdText rounded" value="Recharger les lignes" onclick="btnLignesPrioReload_onclick(event);"></input> 
+              <input type="button" id="btnLignesPrioCenter" class="stdText rounded" value="Centrer sur les lignes" onclick="btnLignesPrioCenter_onclick(event);"></input> 
+              <input id="idLastPosition" type="text" class="stdText" value="" style="text-align:center;width:300px;" hidden></input>
+              <br>
+              <!-- zone de saisie d'une ligne-->
+              <div class="WithShape">
+                <table>
+                  <tr>
+                    <td>
+                      <label class="stdText" style="width:150px;">Nom : </label>
+                      <!--FPI -->
+                      <input type="text" id="idLine_Nom" class="stdText" placeholder="nom de la ligne" value="" style="width:150px; text-align:center;"></input>
+                    </td>
+                    <td>
+                      <label class="stdText" style="width:150px;">Ressource : </label>
+                      <input type="text" id="idLine_RessNum" class="stdText" placeholder="numéro de ressource Diaser" value="" style="width:100px; text-align:center;"></input>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <label class="stdText" style="width:150px;">Ligne de franchissement:</label>
+                      <input type="button" id="btnLigneFranchissementModif" disabled class="stdText rounded"  style="width:120px;" value="Modifier:" onclick="btnLigneFranchissementModif_onclick(event);"></input>
+                    </td>
+                    <td>
+                      <label id="LigneFranchissementPoint1" class="stdText" style="width:300px; text-align:center;">-</label>
+                      <label id="LigneFranchissementPoint2" class="stdText" style="width:300px; text-align:center;">-</label>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <label class="stdText" style="width:150px;">Ligne de direction:</label>
+                      <input type="button" id="btnLigneDirectionModif" disabled class="stdText rounded"  style="width:120px;"value="Modifier:" onclick="btnLigneDirectionModif_onclick(event);"></input>
+                    </td>
+                    <td>
+                      <label id="LigneDirectionPoint1" class="stdText" style="width:300px; text-align:center;">-</label>
+                      <label id="LigneDirectionPoint2" class="stdText" style="width:300px; text-align:center;">-</label>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <input type="button" id="btnLignesDetectionValider" disabled class="stdText rounded" value="Sauvegarder la ligne" onclick="btnLignesDetectionValider_onclick(event);"></input>
+                    </td>
+                    <td>
+                        <input type="button" id="btnLignesDetectionSave" disabled class="stdText rounded" value="Sauvegarder toutes les lignes" onclick="btnLignesDetectionSave_onclick(event);"></input>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div id="end_tabLignesPrio">
+
+        </div id="end_tabToolBox">
+
+        <!-- carte -->
+        <div id="tabVisuMap" class="WithShape fill" style="width: 1170px; height: 700px;">
+          <label>Type de carte:</label>
+          <select id="listMapType" class="OverflowAuto stdText" onchange="listMapType_onchange(event);" >
+          <option value="OSM" selected>Open Street Map</option>
+          <!--option value="stamen.normal">Stamen normal</option>
+          <option value="stamen.toner">Stamen toner</option>
+          <option value="stamen.hybrid">Stamen hybrid</option>
+          <option value="stamen.labels">Stamen labels</option>
+          <option value="stamen.lines">Stamen lines</option>
+          <option value="stamen.background">Stamen background</option>
+          <option value="stamen.lite">Stamen lite</option>
+          <option value="stamen.terrain">Stamen terrain</option-->
+          </select>
+          <br>
+          <div id="map" class="map internal"  tabindex="0">
+          <div id="infoToolTip"></div>
+          </div>
+        </div id="end_tabVisuMap">
+      </div id="end_tabVisu">
+    </div id="end_mainTab">
+
+    <br>
+    <div class="WithShape OverflowAuto ">
+        <label id="idLogCaption" class="stdTextBold" onclick="clearLogList(event);">Logs</label>
+        <select id="logList" size="10" class="OverflowAuto stdText" 
+          style="width:100%; overflow-y:scroll; background-image:linear-gradient(to bottom, #EEEEEE, #FFFFFF); " > </select>
+    </div>
+    <br>
+    <div id="footer" class="WithShape OverflowAuto ">
+        <img src="./medias/fareco_fayat.jpg" id="farecoLogo" alt="FARECO"></img>
+    </div>
+  </body>
+
+  <script language="javascript" type="text/javascript">
+
+    const _hostAddress = window.location.hostname;
+    const _hostPort = window.location.port;
+
+    const _ygk_hostAddress = window.location.hostname;
+    const _ygk_portWebSocket = 8080;
+
+    var _map = null;
+    var _transformRoute = null;
+    
+    var _sourceVectorStations = null;
+    var _layerVectorStation = null;
+
+    // liste des tous les types de carte affichables
+    var _mapLayers = {};
+
+    var _sourceVectorMeasures = null;
+    var _layerVectorMeasures = null;
+
+    var _lastLocation = [2.311230, 48.91831];
+    var _lastZoom = 17;
+    
+    // à minima, dernières informations (camJsonData) reçues des stations
+    var _stations = [];
+
+    //var _currentStationData = {};
+    var _currentStationId = null;
+
+    // dernier timestamp unix donné par un message LDM
+    var _stationClock = [];
+
+    // mesure acquises sur demande (couple de station, rssi, etc...)
+    var _measures = [];
+    var _measureStations = [];
+
+    // periode de verification de l'activité 
+    // ce délai va etre legerement décalé pour ne pas tomber simultanément
+    const _delaiSilenceBase = 5000;
+    var _delaiSilence = _delaiSilenceBase;
+
+    var _timerScanStationLifeHdl = null;
+    var _timerScanStationLifeDelay = 5000;
+
+    var _timerScanSpat = null;
+    var _timerScanSpatDelay = 10000;
+    var _lastSPAT = [];
+
+
+    var sound_ok = new Audio('./medias/ding.wav');
+    var sound_nok = new Audio('./medias/boop.wav');
+    
+    // tooltip sur les stations
+    var _infoToolTip = $('#infoToolTip');
+    _infoToolTip.tooltip({
+      animation: false,
+      trigger: 'manual'
+      });
+
+
+    // messages websocket
+    var _wss = [
+      { name: "OwnCAM",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/pubsub/sub/42/0", 
+        onopen: wsOnOpen_OwnCAM, 
+        onclose: wsOnClose_OwnCAM, 
+        onmessage: wsOnMessage_OwnCAM,        
+        onerror: wsOnError_OwnCAM,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_OwnCAM,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_OwnCAM,
+        lastMsgDate: null}
+        
+      ,{  name: "InCAM",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/pubsub/sub/32/0", 
+        onopen: wsOnOpen_InCAM, 
+        onclose: wsOnClose_InCAM, 
+        onmessage: wsOnMessage_InCAM,
+        onerror: wsOnError_InCAM,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_InCAM,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_InCAM,
+        lastMsgDate: null  }
+        
+      ,{  name: "OwnSPAT",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/pubsub/sub/44/0", 
+        onopen: wsOnOpen_OwnSPAT, 
+        onclose: wsOnClose_OwnSPAT, 
+        onmessage: wsOnMessage_OwnSPAT,
+        onerror: wsOnError_OwnSPAT,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_OwnSPAT,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_OwnSPAT,
+        lastMsgDate: null  }
+        
+                  
+      ,{  name: "InSPAT",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/pubsub/sub/24/0", 
+        onopen: wsOnOpen_InSPAT, 
+        onclose: wsOnClose_InSPAT, 
+        onmessage: wsOnMessage_InSPAT,
+        onerror: wsOnError_InSPAT,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_InSPAT,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_InSPAT,
+        lastMsgDate: null  }
+        
+      ,{  name: "OwnMAP",
+        handle: null, 
+        port: 8080, 
+        //uri: "ws://{0}:{1}/pubsub/sub/43/0", 
+        uri: "ws://{0}:{1}/pubsub/sub/33/0", 
+        onopen: wsOnOpen_OwnMAP, 
+        onclose: wsOnClose_OwnMAP, 
+        onmessage: wsOnMessage_OwnMAP,
+        onerror: wsOnError_OwnMAP,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_OwnMAP,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_OwnMAP,
+        lastMsgDate: null  }
+
+      ,{  name: "InMAP",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/pubsub/sub/23/0", 
+        onopen: wsOnOpen_InMAP, 
+        onclose: wsOnClose_InMAP, 
+        onmessage: wsOnMessage_InMAP,
+        onerror: wsOnError_InMAP,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_InMAP,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_InMAP,
+        lastMsgDate: null  }
+
+      ,{  name: "LDMInfoCAM",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/cache/register/10/0/0", 
+        onopen: wsOnOpen_LDMInfoCAM, 
+        onclose: wsOnClose_LDMInfoCAM, 
+        onmessage: wsOnMessage_LDMInfoCAM,
+        onerror: wsOnError_LDMInfoCAM,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_LDMInfoCAM,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_LDMInfoCAM,
+        lastMsgDate: null  }
+
+      // les canaux suivant on l'air de planter le mécanisme LDM: on se contente pour l'instant de celui qui nous donne le radioPower
+      /*,
+
+      ,{  name: "LDMInfoDENM",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/cache/register/11/0/0", 
+        onopen: wsOnOpen_LDMInfoDENM, 
+        onclose: wsOnClose_LDMInfoDENM, 
+        onmessage: wsOnMessage_LDMInfoDENM,
+        onerror: wsOnError_LDMInfoDENM,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_LDMInfoDENM,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_LDMInfoDENM,
+        lastMsgDate: null  }
+
+      ,{  name: "LDMInfoSPATMAP",
+        handle: null, 
+        port: 8080, 
+        uri: "ws://{0}:{1}/cache/register/12/0/0", 
+        onopen: wsOnOpen_LDMInfoSPATMAP, 
+        onclose: wsOnClose_LDMInfoSPATMAP, 
+        onmessage: wsOnMessage_LDMInfoSPATMAP,
+        onerror: wsOnError_LDMInfoSPATMAP,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_LDMInfoSPATMAP,
+        timerNoMessageHdl: null,
+        timerNoMessage: timerNoMessage_LDMInfoSPATMAP,
+        lastMsgDate: null  }*/
+
+      ,{  name: "UBR_WS",
+        handle: null, 
+        port: 9081, 
+        uri: "ws://{0}:{1}", 
+        onopen: wsOnOpen_UBR_WS, 
+        onclose: wsOnClose_UBR_WS, 
+        onmessage: wsOnMessage_UBR_WS,
+        onerror: wsOnError_UBR_WS,
+        timerRetryHdl: null,
+        timerRetry: timerRetry_UBR_WS,
+        timerNoMessageHdl: null,
+        timerNoMessage: null,
+        lastMsgDate: null  }
+			];
+
+    /**/
+    $(document).mousemove(function(e) {
+      _mouseX = e.pageX;
+      _mouseY = e.pageY;
+      }).mouseover(); // call the handler immediately
+    
+    // prevent from d&d
+    document.body.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      }, 
+      false);
+      
+    document.body.addEventListener("drop", function(e) {
+      e.preventDefault();
+      }, 
+      false);
+
+    // disable the default browser's context menu.
+    $(document).bind("contextmenu", function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      return false;
+      });
+      
+    /*
+				*/
+		$(document).ready(function() {
+      logInList( "NexoManager starts.")
+
+      ygkStartCommunication(null);
+
+      // par defaut
+      document.getElementById("idTabGeneral").click();
+      //document.getElementById("idTabVisu").click();
+
+      document.getElementById("tabMesures").click();
+
+      initMap();
+
+      // surveillance de la vie des stations
+      _timerScanStationLifeHdl = setTimeout( timerScanStationLifeCallback, _timerScanStationLifeDelay);
+
+      // surveillance de non réception des SPaT
+      _timerScanSpat = setTimeout( timerScanSpatCallback, _timerScanSpatDelay);
+      });
+
+    /**/
+    function hostNamePostProcessing( inValue) {
+      var outValue = inValue;
+      outValue = inValue.replace(/[\n\r]+/g, '');
+      $('#idHostname')[0].value = outValue;
+      }
+
+    /**/
+    function networkDataPostProcessing( inValue) {
+      var lines = inValue.splitEx("\n");
+      lines.forEach( function( line) {
+        var words = line.splitEx(" ");
+        if (line.indexOf("address") > -1) {
+          $('#idIpFixe')[0].value = words[words.length-1];
+          }
+        else if (line.indexOf("netmask") > -1) {
+          $('#idMaskFixe')[0].value = words[words.length-1];
+          }
+        else if (line.indexOf("gateway") > -1) {
+          $('#idGatewayFixe')[0].value = words[words.length-1];
+          }
+        });
+      }
+
+    /*
+      */
+    function sendHttpRequest( request, responseElement, postProcessingFunc) {
+      const Http = new XMLHttpRequest();
+      const url='http://' + _hostAddress + ':' + _hostPort.toString() + request;
+      Http.onreadystatechange = function(e) {
+        if (this.readyState == 4 && this.status == 200) {
+          logInList( request + ", bilan : " + Http.responseText);
+          var jsnResponse = JSON.parse( Http.responseText);
+          var newValue = jsnResponse.newValue;
+          if (responseElement != undefined) {  
+            responseElement[0].value = newValue;
+            }
+          else if (postProcessingFunc != undefined) {
+            postProcessingFunc(newValue);
+            }
+          }
+        }
+      Http.open("GET", url, true);
+      Http.send(null);
+      }
+
+    
+    /*
+      */
+    function sendHttpGetFile( request, fileDescription, postProcessingFunc) {
+      const Http = new XMLHttpRequest();
+      const url='http://' + _hostAddress + ':' + _hostPort.toString() + request;
+      Http.onreadystatechange = function(e) {
+        if (this.readyState == 4 && this.status == 200) {
+          logInList( request + ", bilan : " + fileDescription + " chargé.");
+          
+          if (postProcessingFunc != undefined) {
+            postProcessingFunc( fileDescription, Http.responseText);
+            }          
+          }
+        }
+      Http.open("GET", url, true);
+      Http.send(null);
+      }
+    
+    /*
+      */
+      function sendHttpPostJson( request, jsn, requestDescription, postProcessingFunc) {
+      const Http = new XMLHttpRequest();
+      const url = 'http://' + _hostAddress + ':' + _hostPort.toString() + request;
+      Http.onreadystatechange = function(e) {
+        if (this.readyState == 4 && this.status == 200) {
+                    
+          logInList( 'request : ' + requestDescription + ", bilan : " + Http.responseText);
+
+          var json = JSON.parse( Http.responseText);
+          
+          if (postProcessingFunc != undefined) {
+            postProcessingFunc( requestDescription, Http.responseText);
+            }          
+          }
+        }
+      Http.open("POST", url, true);
+      Http.setRequestHeader("Content-Type", "application/json");
+      var strJsn = JSON.stringify( jsn );
+      Http.send( strJsn);
+      }
+
+    /**/
+    $( "#idButtonReboot" ).click(function() {
+      sendHttpRequest( "/System.Reboot")
+      });
+
+    /**/
+    $( "#idStopServiceSpat" ).click(function() {
+      sendHttpRequest( "/stopStartService?service=spat_mobile&way=stop");
+      });
+    
+    /**/
+    $( "#idStartServiceSpat" ).click(function() {
+      sendHttpRequest( "/stopStartService?service=spat_mobile&way=start");
+      });
+
+    /**/
+    $( "#idButtonForceDate" ).click(function() {
+
+      sendHttpRequest( "/System.Date.Force?datetime=" + timedatectlFormat());
+      });
+
+    /**/
+    $( "#idButtonStop" ).click(function() {
+      sendHttpRequest( "/System.Halt");
+      });
+
+     /**/
+     $( "#idButtonMiddleWareRestart" ).click(function() {
+      sendHttpRequest( "/MiddleWare.Restart");
+      });
+ 
+    /**/
+     $( "#idButtonGetAll" ).click(function() {
+      sendHttpRequest( "/MiddleWare.Version.Get", $('#idTextMiddlewareRelease'));
+
+      sendHttpRequest( "/SpatModule.Version.Get", $('#idTextSpatMapRelease'));
+
+      sendHttpRequest( "/MiddleWare.StationId.Get", $('#idTextStationIdInput'));
+
+      sendHttpRequest( "/MiddleWare.Latitude.Get", $('#idTextStationLatitudeInput'));
+      sendHttpRequest( "/MiddleWare.Longitude.Get", $('#idTextStationLongitudeInput'));
+
+      sendHttpRequest( "/System.IpFixe.Get", undefined, networkDataPostProcessing);
+
+      sendHttpRequest( "/System.Hostname.Get", undefined, hostNamePostProcessing);
+
+      sendHttpRequest( "/System.Temperature.Get", undefined, temperaturePostProcessing);
+      });
+
+    /**/
+    $( "#idButtonMiddleWareVersionGet" ).click(function() {
+      sendHttpRequest( "/MiddleWare.Version.Get", $('#idTextMiddlewareRelease'));
+      });     
+ 
+    /**/
+    $( "#idButtonSpatVersionGet" ).click(function() {
+      sendHttpRequest( "/SpatModule.Version.Get", $('#idTextSpatMapRelease'));
+      });  
+
+    /*
+    $( "#idButtonStationIdGet" ).click(function() {
+      sendHttpRequest( "/MiddleWare.StationId.Get");
+      });*/
+      
+    /**/
+    $( "#idButtonStationIdSet" ).click(function() {
+        // num de station
+        const stationId = $('#idTextStationIdInput').val() 
+        if (stationId == "") return;
+        // commande
+        sendHttpRequest( "/MiddleWare.StationId.Set?stationId=" + stationId);
+      });
+
+    /**/
+    $( "#idButtonStationIdGet" ).click(function() {
+        // controle
+        sendHttpRequest( "/MiddleWare.StationId.Get", $('#idTextStationIdInput'));
+        });
+      
+     /**/
+     $( "#idButtonLatitudeSet" ).click(function() {
+        // latitude
+        var latitude = $('#idTextStationLatitudeInput').val() ;
+        if (latitude == "") return;
+        //latitude = latitude.replace( ".", ",");
+        latitude = parseFloat(latitude.toString());
+
+        // commande
+        sendHttpRequest( "/MiddleWare.Latitude.Set?latitude=" + latitude);
+        });
+      
+     /**/
+     $( "#idButtonLatitudeGet" ).click(function() {
+        // controle
+        sendHttpRequest( "/MiddleWare.Latitude.Get", $('#idTextStationLatitudeInput'));
+        });
+
+     /**/
+     $( "#idButtonLongitudeSet" ).click(function() {
+        // longitude
+        var longitude = $('#idTextStationLongitudeInput').val() ;
+        if (longitude == "") return;
+        //longitude = longitude.replace( ".", ",");
+        longitude = parseFloat(longitude.toString());
+
+        // commande
+        sendHttpRequest( "/MiddleWare.Longitude.Set?longitude=" + longitude);
+        });
+
+     /**/
+     $( "#idButtonLongitudeGet" ).click(function() {
+        // controle
+        sendHttpRequest( "/MiddleWare.Longitude.Get", $('#idTextStationLongitudeInput'));
+      });
+
+     /**/
+     $( "#idButtonIpFixeGet" ).click(function() {
+        sendHttpRequest( "/System.IpFixe.Get", undefined, networkDataPostProcessing);
+       });
+      
+     /**/
+     $( "#idButtonIpFixeSet" ).click(function() {
+        // ip
+        const idFixe = $('#idIpFixe').val() ;
+        if (idFixe == "") return;
+        if (ValidateIPaddress(idFixe) == false) {
+          logInList("adresse invalide.");
+          return;
+          }
+        const maskFixe = $('#idMaskFixe').val() ;
+        if (maskFixe == "") return;
+        if (ValidateIPaddress(maskFixe) == false) {
+          logInList("masque invalide.");
+          return;
+          }
+
+        const gatewayFixe = $('#idGatewayFixe').val() ;
+        if (gatewayFixe == "") return;
+        if (ValidateIPaddress(gatewayFixe) == false) {
+          logInList("passerelle invalide.");
+          return;
+          }
+
+        // commande
+        sendHttpRequest( "/System.IpFixe.Set?ipFixe=" + idFixe + "&maskFixe=" + maskFixe + "&gatewayFixe=" + gatewayFixe);
+        });
+          
+     /**/
+     $( "#idButtonHostameGet" ).click(function() {
+        sendHttpRequest( "/System.Hostname.Get", undefined, hostNamePostProcessing);
+        });
+
+    /**/
+    $("#idButtonTemperatureGet").click(function() {
+        sendHttpRequest( "/System.Temperature.Get", undefined, temperaturePostProcessing);
+        });
+
+    /**/
+    function logInList(message, prefix) {
+      var tmpPrefix = "";
+			if (prefix == null) {
+        //create new text node
+        dt = new Date();
+        fmtDate = dt.toDateString() + ' ' + dt.toLocaleTimeString() + ',' + dt.getMilliseconds();
+        tmpPrefix = fmtDate + ' > ';
+        }
+      else {
+        tmpPrefix = prefix + ' ';
+        }
+				
+      const fullText = tmpPrefix + message;
+      
+      $("#logList")[0].options.add( new Option( fullText, "0"));
+			$("#logList")[0].options.selectedIndex = $("#logList")[0].options.length - 1;
+				
+      while( $("#logList")[0].options.length > 1000) {
+        $("#logList")[0].options.remove(0);
+        }
+      }
+
+    /**/
+    function updateStationList( camJsonData) {
+
+      var index;
+      var indexFound = -1;
+      var tableStation = document.getElementById("stationTable");
+      var nbStation = tableStation.rows.length - 1;
+      if ( nbStation > 0) {
+        for( index=1; index < nbStation+1; index++) {
+          if (tableStation.rows[index].data.stationId == camJsonData.stationId) {
+            indexFound = index;
+            break;
+            }
+          }
+        }
+
+      //var t = document.getElementById("stationTable");
+      var row = undefined;
+
+      if (indexFound == -1) {        
+
+        row = tableStation.insertRow( tableStation.rows.length);
+        row.onclick = StationListClick;
+
+        var cellId = row.insertCell(0);
+        cellId.class="stdText";
+        cellId.style["text-align"] = "center";
+        
+        var cellType = row.insertCell(1);
+        cellType.class="stdText";
+        cellType.style["text-align"] = "center";
+
+        var cellRSSI = row.insertCell(2);
+        cellRSSI.class="stdText";
+        cellRSSI.style["text-align"] = "center";
+
+        var cellPosition = row.insertCell(3);
+        cellPosition.class="stdText";
+        cellPosition.style["text-align"] = "center";
+
+        var cellSpeed = row.insertCell(4);
+        cellSpeed.class="stdText";
+        cellSpeed.style["text-align"] = "center";
+
+        var cellDistance = row.insertCell(5);
+        cellDistance.class="stdText";
+        cellDistance.style["text-align"] = "center";
+ 
+        var cellDirection = row.insertCell(6);
+        cellDirection.class="stdText";
+        cellDirection.style["text-align"] = "center";
+
+        var cellQuand = row.insertCell(7);
+        cellQuand.class="stdText";
+        cellQuand.style["text-align"] = "left";
+        }
+      else {
+        row = tableStation.rows[indexFound];
+        }
+
+      var cellId = row.cells[0];
+      cellId.innerText = camJsonData.stationId;
+      
+      var cellType = row.cells[1];
+      if (camJsonData.hasOwnProperty("stationType")) {
+        cellType.innerText = camJsonData.stationType;
+        if (camJsonData.stationType == 5) cellType.innerText = "vehicle";
+        if (camJsonData.stationType == 6) cellType.innerText = "bus";
+        if (camJsonData.stationType == 15) cellType.innerText = "station";
+        }
+      else if (camJsonData.hasOwnProperty("objectType")) {
+        //cellType.innerText = "-";
+        }
+
+      var cellRSSI = row.cells[2];
+      if (camJsonData.hasOwnProperty("radioPower")) {
+        cellRSSI.innerText = camJsonData["radioPower"].toString();
+        }
+
+      var cellPosition = row.cells[3];
+      if (camJsonData.hasOwnProperty("latitude") 
+        && camJsonData.hasOwnProperty("longitude")
+        && camJsonData.hasOwnProperty("altitude")) {
+        cellPosition.innerText = "latitude: " + camJsonData.latitude.toFixed(6) + "; "
+          + "longitude: " + camJsonData.longitude.toFixed(6) + "; "
+          + "altitude: " + camJsonData.altitude.toFixed(0) + ";";
+        }
+
+      var cellSpeed = row.cells[4];
+      if (camJsonData.hasOwnProperty("speed")) {
+        cellSpeed.innerText = camJsonData["speed"].toFixed(2).toString();
+        }
+
+      var cellDistance = row.cells[5];
+      if (camJsonData.hasOwnProperty("distance")) {
+        cellDistance.innerText = camJsonData["distance"].toFixed(0).toString();
+        }
+      
+      var cellDirection = row.cells[6];
+      if (camJsonData.hasOwnProperty("orientation")) {
+        var orientation = camJsonData["orientation"].toFixed(0);
+        if (orientation != 0) {
+          cellDirection.innerText = orientation.toString().padStart(3, '0');
+          }
+        }
+
+      var cellQuand = row.cells[7];
+      if (camJsonData.hasOwnProperty("stationLastClock")) {
+        cellQuand.innerText = camJsonData["stationLastClock"];
+        }
+      /*else if (camJsonData.hasOwnProperty("receivedAt")) {
+        cellQuand.innerText = camJsonData["receivedAt"];
+        }*/
+
+      row.data = camJsonData;      
+      }
+
+
+    /* 'ok', 'nok'
+      */
+    function updateStationLifeSign( camJsonData, sStatus) {
+      var index;
+      var indexFound = -1;
+      var tableStation = document.getElementById("stationTable");
+      var nbStation = tableStation.rows.length - 1;
+      if ( nbStation > 0) {
+        for( index=1; index < nbStation+1; index++) {
+          if (tableStation.rows[index].data.stationId == camJsonData.stationId) {
+            indexFound = index;
+            break;
+            }
+          }
+        }
+
+      var row = undefined;
+      if (indexFound == -1) return;
+      row = tableStation.rows[indexFound];
+
+      var cellQuand = row.cells[7];
+      if (sStatus == 'ok'
+        && isClass( cellQuand, 'stdTextAlert')) {
+        cellQuand.classList.remove( 'stdTextAlert');
+        try {
+          var playPromise = sound_ok.play();
+          if (playPromise !== undefined) {
+            playPromise.then(function() {
+              // Automatic playback started!
+              }).catch(function(error) {
+              // Automatic playback failed.
+              });
+            }
+
+          } catch(errSound) {}
+        }
+      else if (sStatus == 'nok'
+        && isClass( cellQuand, 'stdTextAlert') == false) {
+        cellQuand.classList.add( 'stdTextAlert');
+        try {
+          var playPromise = sound_nok.play();
+          if (playPromise !== undefined) {
+            playPromise.then(function() {
+              // Automatic playback started!
+              }).catch(function(error) {
+              // Automatic playback failed.
+              });
+            }
+          } catch(errSound) {}
+        }
+      }
+
+    /* afficher le tab
+      */
+    function openTab(evt, tabFamily, tabId, postAction) {
+      // Declare all variables
+      var i, tabcontent, tablinks;
+
+      // Get all elements with class="tabcontent" and hide them
+      tabContents = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabContents.length; i++) {
+        if (tabContents[i].classList.contains(tabFamily)){ 
+          tabContents[i].style.display = "none";
+          }
+        }
+
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        if (tablinks[i].classList.contains(tabFamily)){ 
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+          }
+        }
+
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(tabId).style.display = "block";
+      evt.currentTarget.className += " active";
+
+      if (postAction == null) {}
+      else postAction( tabId);
+      }
+
+    /*
+      */
+    function openTabPostAction( tabId) {
+      if (tabId == "tabVisu" && _map != null) {
+        _map.setSize([ $("#tabVisuMap")[0].clientWidth , $("#tabVisuMap")[0].clientHeight]);
+        }
+      }
+
+    /*
+        */
+    function getWs( name) {
+      var found = null;
+      _wss.forEach( function( element) {
+        if (element.name == name) {
+          found = element;
+          }
+        });
+      return found;
+      }
+
+    /*
+      */
+    function closeWebSocket( element) {
+      if (element.handle != null) {
+        try {
+          element.handle.close();
+          }
+        catch( Err) {}
+        element.handle = null;
+        }
+      }
+
+    /*
+        */
+    function ygkStartCommunication( sChanel) {
+
+      _wss.forEach( function( element) {
+
+        if (sChanel == element.name
+          || sChanel == null) {
+
+          var wsUri = element.uri.format( _ygk_hostAddress, element.port) ;
+          try {
+            element.handle = new WebSocket( wsUri);
+            
+            element.handle.binaryType = 'arraybuffer';
+            
+            element.handle.onopen = function(evt) { element.onopen(evt) };
+            element.handle.onclose = function(evt) { element.onclose(evt) };
+            element.handle.onmessage = function(evt) { element.onmessage(evt) };
+            element.handle.onerror = function(evt) { element.onerror(evt) };
+
+            _delaiSilence += 250;
+            if (element.timerNoMessage != null) {
+              element.timerNoMessageHdl = setTimeout( element.timerNoMessage, _delaiSilence);
+              }
+            }
+          catch(err) {
+            logInList( element.name + " > startWebSocket > " + err);
+            }
+          }
+        });
+      }
+
+    function wsOnOpen_OwnCAM( evt) { wsOnOpen( evt, "OwnCAM");}
+    function wsOnOpen_InCAM( evt) { wsOnOpen( evt, "InCAM");}
+    function wsOnOpen_OwnSPAT( evt) { wsOnOpen( evt, "OwnSPAT");}
+    function wsOnOpen_InSPAT( evt) { wsOnOpen( evt, "InSPAT");}
+    function wsOnOpen_OwnMAP( evt) { wsOnOpen( evt, "OwnMAP");}
+    function wsOnOpen_InMAP( evt) { wsOnOpen( evt, "InMAP");}
+    
+    function wsOnOpen_LDMInfoCAM( evt) { wsOnOpen( evt, "LDMInfoCAM");}
+    function wsOnOpen_LDMInfoDENM( evt) { wsOnOpen( evt, "LDMInfoDENM");}
+    function wsOnOpen_LDMInfoSPATMAP( evt) { wsOnOpen( evt, "LDMInfoSPATMAP");}
+
+    function wsOnClose_OwnCAM( evt) { wsOnClose( evt, "OwnCAM");}
+    function wsOnClose_InCAM( evt) { wsOnClose( evt, "InCAM");}
+    function wsOnClose_OwnSPAT( evt) { wsOnClose( evt, "OwnSPAT");}
+    function wsOnClose_InSPAT( evt) { wsOnClose( evt, "InSPAT");}
+    function wsOnClose_OwnMAP( evt) { wsOnClose( evt, "OwnMAP");}
+    function wsOnClose_InMAP( evt) { wsOnClose( evt, "InMAP");}
+
+    function wsOnClose_LDMInfoCAM( evt) { wsOnClose( evt, "LDMInfoCAM");}
+    function wsOnClose_LDMInfoDENM( evt) { wsOnClose( evt, "LDMInfoDENM");}
+    function wsOnClose_LDMInfoSPATMAP( evt) { wsOnClose( evt, "LDMInfoSPATMAP");}
+       
+    function wsOnError_OwnCAM( evt) { wsOnError( evt, "OwnCAM");}
+    function wsOnError_InCAM( evt) { wsOnError( evt, "InCAM");}
+    function wsOnError_OwnSPAT( evt) { wsOnError( evt, "OwnSPAT");}
+    function wsOnError_InSPAT( evt) { wsOnError( evt, "InSPAT");}
+    function wsOnError_OwnMAP( evt) { wsOnError( evt, "OwnMAP");}
+    function wsOnError_InMAP( evt) { wsOnError( evt, "InMAP");}
+
+    function wsOnError_LDMInfoCAM( evt) { wsOnError( evt, "LDMInfoCAM");}
+    function wsOnError_LDMInfoDENM( evt) { wsOnError( evt, "LDMInfoDENM");}
+    function wsOnError_LDMInfoSPATMAP( evt) { wsOnError( evt, "LDMInfoSPATMAP");}
+
+    function timerRetry_OwnCAM( evt) { 
+      timerRetryCallback( evt, "OwnCAM");
+      }
+    function timerRetry_InCAM( evt) { 
+      timerRetryCallback( evt, "InCAM");
+      }
+    function timerRetry_OwnSPAT( evt) { 
+      timerRetryCallback( evt, "OwnSPAT");
+      }
+    function timerRetry_InSPAT( evt) { 
+      timerRetryCallback( evt, "InSPAT");
+      }
+    function timerRetry_OwnMAP( evt) { 
+      timerRetryCallback( evt, "OwnMAP");
+      }
+    function timerRetry_InMAP( evt) { 
+      timerRetryCallback( evt, "InMAP");
+      }
+    function timerRetry_LDMInfoCAM( evt) { 
+      timerRetryCallback( evt, "LDMInfoCAM");
+      }
+    function timerRetry_LDMInfoDENM( evt) { 
+      timerRetryCallback( evt, "LDMInfoDENM");
+      }
+    function timerRetry_LDMInfoSPATMAP( evt) { 
+      timerRetryCallback( evt, "LDMInfoSPATMAP");
+      }
+    
+    function timerNoMessage_OwnCAM( evt) { 
+      timerNoMessage( evt, "OwnCAM");
+      }
+    function timerNoMessage_InCAM( evt) { 
+      timerNoMessage( evt, "InCAM");
+      }
+    function timerNoMessage_OwnSPAT( evt) { 
+      timerNoMessage( evt, "OwnSPAT");
+      }
+    function timerNoMessage_InSPAT( evt) { 
+      timerNoMessage( evt, "InSPAT");
+      }
+    function timerNoMessage_OwnMAP( evt) { 
+      timerNoMessage( evt, "OwnMAP");
+      }
+    function timerNoMessage_InMAP( evt) { 
+      timerNoMessage( evt, "InMAP");
+      }
+    function timerNoMessage_LDMInfoCAM( evt) { 
+      timerNoMessage( evt, "LDMInfoCAM");
+      }
+     function timerNoMessage_LDMInfoDENM( evt) { 
+      timerNoMessage( evt, "LDMInfoDENM");
+      }
+    function timerNoMessage_LDMInfoSPATMAP( evt) { 
+      timerNoMessage( evt, "LDMInfoSPATMAP");
+      }
+
+    function wsOnMessage_OwnCAM( evt) { wsOnMessage( evt, "OwnCAM");}
+    function wsOnMessage_InCAM( evt) { wsOnMessage( evt, "InCAM");}
+    function wsOnMessage_OwnSPAT( evt) { wsOnMessage( evt, "OwnSPAT");}
+    function wsOnMessage_InSPAT( evt) { wsOnMessage( evt, "InSPAT");}
+    function wsOnMessage_OwnMAP( evt) { wsOnMessage( evt, "OwnMAP");}
+    function wsOnMessage_InMAP( evt) { wsOnMessage( evt, "InMAP");}
+    function wsOnMessage_LDMInfoCAM( evt) { wsOnMessage( evt, "LDMInfoCAM");}
+    function wsOnMessage_LDMInfoDENM( evt) { wsOnMessage( evt, "LDMInfoDENM");}
+    function wsOnMessage_LDMInfoSPATMAP( evt) { wsOnMessage( evt, "LDMInfoSPATMAP");}
+
+    /*
+      */
+    function wsOnOpen(evt, sChanel) {
+      logInList( JSON.stringify( { "origin" : sChanel, "status" : "connected"} ) );
+      setChanelConnectionState( sChanel, "oui");
+      }
+       
+    /*
+      */
+    function wsOnClose(evt, sChanel) {
+      logInList( JSON.stringify( { "origin" : sChanel, "status":"disconnected"} ) );
+      var element = getWs( sChanel);
+      
+      element.handle = null;
+      _delaiSilence = _delaiSilenceBase;
+
+      if (element.timerNoMessageHdl != null) {
+        clearTimeout( element.timerNoMessageHdl);
+        }
+      element.timerNoMessageHdl = null;
+
+      setChanelConnectionState( sChanel, "non");
+
+      // arme la reconnexion
+      element.timerRetryHdl = setTimeout( element.timerRetry, 5000);
+      }
+
+    /*
+     */
+    function wsOnError(evt, sChanel) {
+      logInList( sChanel + ' chanel > error : ' + evt );
+      setChanelConnectionState( sChanel, "erreur");
+      }
+
+    /*
+      */
+    function timerRetryCallback(evt, sChanel) {
+
+      ygkStartCommunication( sChanel);
+      }
+
+    /*
+      */
+    function timerNoMessage(evt, sChanel) {
+
+      var element = getWs( sChanel);
+      if (element.handle == null) return true;
+
+      // verifier la date de reception : element.lastMsgDate
+      if (element.lastMsgDate == null) {
+        setChanelOperStateMuted( sChanel);
+        return;
+        }
+
+      try {
+        var now = new Date();
+        var diffInMs = Math.abs( now.getTime() - element.lastMsgDate.getTime());
+        if (diffInMs > _delaiSilenceBase) {
+          setChanelOperStateMuted( sChanel);
+          }
+        }
+      catch(err) {}
+
+      if (element.timerNoMessage != null) {
+        element.timerNoMessageHdl = setTimeout( element.timerNoMessage, _delaiSilence);
+        }
+      }
+
+    /*
+      */
+    function wsOnMessage( evt, sChanel) {
+      var element = getWs( sChanel);
+      if (element.handle == null) return true;
+
+      element.lastMsgDate = new Date();
+      setChanelOperState( sChanel, element.lastMsgDate.yyyymmddhhmmssl());
+
+      setTimeout( processMessage, 10, sChanel, evt.data);
+      return true;
+      }
+
+    /*
+      */
+    var _processSpatRecus = false;
+    function chkSpatRecu_onchange( e) {
+      var cb = $("#chkSpatRecu")[0];
+			_processSpatRecus = cb.checked;
+      }
+
+    /*
+      */
+    function processMessage( sChanel, strJson) {
+      // logInList( sChanel + ' receives : ' + data );
+
+      if (sChanel == "OwnCAM" || sChanel == "InCAM") {
+        try {
+					do {
+						var tmpJson = JSON.parse( strJson);
+						
+            var camJsonData = new Array();
+
+            var value = getFromPath( tmpJson, "header/stationID");
+						if (value != null) camJsonData["stationId"] = value;
+
+            if (sChanel == "OwnCAM") {
+              $("#IdCurrentStationId")[0].innerText = camJsonData["stationId"].toString();
+
+              // _currentStationData = camJsonData;
+              if (camJsonData["stationId"] != null) {
+                _currentStationId = camJsonData.stationId;
+                }
+              }
+						
+						var value = getFromPath( tmpJson, "cam/camParameters/basicContainer/stationType");
+						if (value != null) camJsonData["stationType"] = value;
+
+            if (sChanel == "OwnCAM") {
+              $("#IdCurrentStationType")[0].innerText = camJsonData["stationType"].toString();
+              }
+						
+						var value = getFromPath( tmpJson, "cam/camParameters/basicContainer/referencePosition/altitude/altitudeValue");
+						if (value != null) camJsonData["altitude"] = (Number( value) / 100);
+						
+						var value = getFromPath( tmpJson, "cam/camParameters/basicContainer/referencePosition/latitude");
+						if (value != null) camJsonData["latitude"] = (Number( value) / 10000000);
+						
+						var value = getFromPath( tmpJson, "cam/camParameters/basicContainer/referencePosition/longitude");
+						if (value != null) camJsonData["longitude"] = (Number( value) / 10000000);
+            
+            if (sChanel == "OwnCAM") {
+              $("#idLatitude")[0].innerText = camJsonData["latitude"].toString();
+              $("#idLongitude")[0].innerText = camJsonData["longitude"].toString();
+              $("#idAltitude")[0].innerText = camJsonData["altitude"].toString();
+              }
+
+						/*var value = getFromPath( tmpJson, "cam/camParameters/highFrequencyContainer/0/speed/speedValue");
+            if (value != null) camJsonData["speed"] = (Number( value) / 100).toString();*/
+                        
+            if (sChanel == "InCAM") {
+              if (_currentStationId != null) {
+                var currentStationData = getStationDataInDico( _currentStationId);
+
+                var currentStationLatLon = new LatLon( currentStationData["latitude"], currentStationData["longitude"]);
+                var stationLatLon = new LatLon( camJsonData["latitude"], camJsonData["longitude"]);
+                camJsonData["distance"] = currentStationLatLon.distanceTo( stationLatLon);
+                }
+              else {
+                camJsonData["distance"] = 0;
+                }
+              }
+
+            camJsonData["receivedAt"] = new Date().yyyymmddhhmmsslll();
+
+            manageStationOnMapFromLDM_CAM( camJsonData);
+            
+            declareStationInDico( camJsonData);
+
+            if (sChanel == "OwnCAM"
+              && camJsonData["stationType"] != 15) {
+           
+              var orientation = camJsonData["orientation"].toFixed(0);
+              if (orientation != 0) {
+                $("#idDirection")[0].innerText = orientation.toString().padStart(3, '0');  
+                }
+              }
+
+            updateStationList( camJsonData);
+            }
+          while(false);
+          }
+        catch(err) {}
+        return;
+        //!!!!!
+        }
+
+      if (sChanel == "LDMInfoCAM"
+          || sChanel == "LDMInfoDENM"
+          || sChanel == "LDMInfoSPATMAP") {
+        try {
+					do {
+						var tmpJson = JSON.parse( strJson);
+						
+            var camJsonData = new Array();
+
+            var value = getFromPath( tmpJson, "stationid");
+						if (value != null) camJsonData["stationId"] = value;
+						
+						var value = getFromPath( tmpJson, "stationtypevehicle");
+						if (value != null) camJsonData["stationType"] = value;
+
+            var value = getFromPath( tmpJson, "radiopower");
+						if (value != null) {
+              camJsonData["radioPower"] = value.toString();
+              }
+
+            var value = getFromPath( tmpJson, "latitude");
+						if (value != null) camJsonData["latitude"] = Number( value);
+
+            var value = getFromPath( tmpJson, "longitude");
+						if (value != null) camJsonData["longitude"] = Number( value);
+
+            var value = getFromPath( tmpJson, "altitude");
+						if (value != null) camJsonData["altitude"] = Number( value);
+
+						/*var value = getFromPath( tmpJson, "speed");
+            if (value != null) camJsonData["speed"] = Number( value);*/
+            
+            /*var value = getFromPath( tmpJson, "distance");
+            if (value != null) camJsonData["distance"] = Number( value);*/
+            
+            var value = getFromPath( tmpJson, "lastupdate");
+            if (value != null) {
+              //camJsonData["lastUpdate"] = TimeStampMilliToDate( value);
+              camJsonData["stationLastClockBin"] = value;
+              camJsonData["stationLastClock"] = TimeStampMilliToDate( value);
+
+              // A UTILISER POUR LE CALCUL de l'écart en 1/10 de sec pour les delais du SPAT de la même station
+              addStationClock( camJsonData );
+
+              // si on est la station courante
+              if (camJsonData["stationId"] == _currentStationId) {
+                do {
+                  var timeOffsetInMs = 0;
+                  var now = new Date();
+                  if (camJsonData['stationLastClockBin'] == null) break;
+                  var lastSign = new Date( camJsonData.stationLastClockBin);
+                  timeOffsetInMs = Math.abs( now.getTime() - lastSign.getTime());
+                  // calculer l'offset temporel
+                  //$('#idTimeOffset').text( timeOffsetInMs.toString());
+                  }
+                while(false);
+                }
+              }
+						
+            camJsonData["receivedAt"] = new Date().yyyymmddhhmmsslll();
+
+            manageStationOnMapFromLDM_CAM( camJsonData);
+            
+            declareStationInDico( camJsonData);
+
+            updateStationList( camJsonData);
+
+            updateToolTip( camJsonData);
+
+            if (sChanel == "LDMInfoCAM"
+              && camJsonData["radioPower"] != null) {
+
+              if (_currentStationId != null) {
+                var currentStationData = getStationDataInDico( _currentStationId);
+                addMeasures( sChanel, currentStationData, camJsonData);
+                }
+              }
+
+            logLDMEvents( sChanel, tmpJson);
+            }
+          while(false);
+          }
+        catch(err) {
+          var e = err;
+          }
+        return;
+        //!!!!!
+        }
+
+      /* analyse les mesages SPAT
+        */
+      if (sChanel == "OwnSPAT" 
+        || sChanel == "InSPAT")  {
+        try {
+					do {
+            // filtrage des SPAT reçus
+            if (_processSpatRecus == false
+              && sChanel == "InSPAT")  {
+              break;
+              //!!!!!
+              }
+
+            var info = "";
+            var tab = "";
+
+            var tmpJson = JSON.parse( strJson);
+
+            var stationId = getFromPath( tmpJson, "header/stationID");
+
+            info += "stationId:" + stationId.toString() + "\n";
+
+            /* FPI
+              utiliser comme référentiel l'horodate de l'UBR
+              */
+            var nowUTC = new Date();
+            var s1 = nowUTC.toString();
+            var s2 = "";
+            /*if (_LastNowPC != null
+              && _currentStationId != null
+              && stationId == _currentStationId) {
+
+              var nowPC = new Date();
+              // combien de ms écoulées depuis la dernière synchro par websocket
+              var x = nowPC.getTime();
+              var diffWithLastSynchroWSInMs = Math.abs( nowPC.getTime() - _LastNowPC.getTime());
+              //console.debug( "ecart stamp: " + diffWithLastSynchroWSInMs);
+
+              nowUTC = new Date( _LastNowUBR.setTime( _LastNowUBR.getTime() + diffWithLastSynchroWSInMs));
+              s2 = nowUTC.toString();
+              }*/
+
+
+            /*var unix_timestamp = getStationLastClock(stationId);
+            if (unix_timestamp != null) {
+              nowUTC = new Date(unix_timestamp*1000);
+              }*/
+
+            var dizSecInHour = nowUTC.getMinutes() * 60 * 10 + nowUTC.getSeconds() * 10 + nowUTC.getMilliseconds() / 100;
+            //console.debug( "SecInHour: " + dizSecInHour/10);
+
+            var spat = tmpJson.spat;
+            var intersections = spat.intersections;
+            var intersectionIndex = 1;
+            tab += "  ";
+            intersections.forEach( function (intersection ) {
+              if (sChanel == "InSPAT") {
+                var InSPAT = 1;
+                }
+              info += tab + "intersection=" + intersectionIndex + "; ";
+
+              var status = intersection.status;
+              info += tab + "status=" + status + "; ";
+
+              var intersectionId = intersection.id;
+              info += tab + "id=" + JSON.stringify( intersectionId) + "; ";
+              info += "\n";
+
+              var states = intersection.states;
+              tab += "  ";
+              var stateIndex = 1;
+              states.forEach( function (state ) {
+                info += tab + "stateIndex=" + stateIndex + "; ";
+
+                var signalGroup = state.signalGroup;
+                info += tab + "signalGroup=" + signalGroup + "; ";
+
+                info += "\n";
+
+                var firstEventState = null;
+                var firstDelay = null;
+                var stateTimeSpeed = state['state-time-speed'];
+                tab += "  ";
+                stateTimeSpeed.forEach( function ( oneStateTimeSpeed) {
+
+                  var sEventState = oneStateTimeSpeed.eventState;
+                  if (firstEventState == null) firstEventState = sEventState;
+
+                  var minEndTime = oneStateTimeSpeed.timing.minEndTime;
+                  if (minEndTime == 36001) {
+                    firstDelay = -1;
+
+                    info += tab + "EventState=" + sEventState + "; ";
+                    info += tab + "resteEnSec=36001; ";
+                    info += "\n";
+                    }
+                  else {
+                    var minEndTimeInDizSec = minEndTime;
+                    var resteEnDizSec = 0;
+                    if (minEndTimeInDizSec < dizSecInHour) {
+                      if (dizSecInHour > 36000) {
+                        resteEnDizSec = minEndTimeInDizSec - (dizSecInHour - 36000);
+                        }
+                      else {								
+                        resteEnDizSec = dizSecInHour - minEndTimeInDizSec;
+                        }
+                      }
+                    else {
+                      resteEnDizSec = minEndTimeInDizSec - dizSecInHour;
+                      }
+
+                    // en seconde
+                    var resteEnSec = resteEnDizSec / 10;
+
+                    // on n'affiche que le premier délai
+                    if (firstDelay == null) {
+                      firstDelay = resteEnSec;
+                      }
+                    else {
+                      // on prend le plus proche
+                      if (firstDelay > resteEnSec) {
+                        firstDelay = resteEnSec;
+                        }
+                      }
+
+                    info += tab + "EventState=" + sEventState + "; ";
+                    info += tab + "reste En Sec.=" + resteEnSec.toFixed(2) + "; ";
+                    info += tab + "reste En Sec. corrigé=" + (resteEnSec - _diffPC_UBRinMs / 1000).toFixed(2) + "; ";
+                    info += "\n";
+                    }
+                  });
+
+                var sWay = "";
+                if (sChanel == "OwnSPAT") sWay = "Génère :" + "\n";
+                if (sChanel == "InSPAT") sWay = "Reçoit :" + "\n";
+
+                // compensation du décalage UBR / PC
+                firstDelay -= (_diffPC_UBRinMs / 1000);
+
+                addNewLight( sWay, stationId, signalGroup, firstEventState, firstDelay);
+
+                stateIndex ++;
+                });
+
+              intersectionIndex++;
+              });
+            $("#idSpatInfo")[0].innerText = info;
+            }
+          while(false);
+          }
+        catch(err) {
+          var x = err;
+          }
+        return;
+        //!!!!!
+        }
+      }
+
+    /* Raffraichit le tooltip, s'il est affiché, pour le RSSI en dynamique
+      */
+    function updateToolTip( camJsonData) {
+      
+      if (_infoToolTip.stationId != camJsonData.stationId) return;
+      if (_infoToolTip.radioPower == camJsonData.radioPower) return;
+      if ($('#infoToolTip')[0].hidden) return;
+
+      var infoTxt = "ID:" + camJsonData.stationId.toString();
+      if (/*camJsonData.stationType != 15
+        && */ camJsonData.hasOwnProperty("radioPower")) {
+        infoTxt += "\n" + "RSSI:" + camJsonData["radioPower"];
+        }
+      _infoToolTip.tooltip('hide').attr('data-original-title', infoTxt).tooltip('show');
+      }
+
+    /* raffraichit l'état du canal (InCAM, OwnCAM, etc...) en fonction de la réception ou non.
+      */
+    function setChanelConnectionState( sChanel, sState) {
+
+      const id = "id" + sChanel + "_connected";
+      const element = document.getElementById( id);
+      if (element) {
+        if (sState != element.innerText) {
+          element.innerText = sState;
+          if (sState == "oui") {
+            element.classList.remove( 'stdTextAlert');
+            try {
+              var playPromise = sound_ok.play();
+              if (playPromise !== undefined) {
+                playPromise.then(function() {
+                  // Automatic playback started!
+                  }).catch(function(error) {
+                  // Automatic playback failed.
+                  });
+                }
+              } catch(errSound) {}
+            }
+          else {
+            element.classList.add( 'stdTextAlert');
+            try {
+              var playPromise = sound_nok.play();
+              if (playPromise !== undefined) {
+                playPromise.then(function() {
+                  // Automatic playback started!
+                  }).catch(function(error) {
+                  // Automatic playback failed.
+                  });
+                }
+              } catch(errSound) {}
+            }
+          }
+        }
+      }
+
+    /*  raffraichit la dernière date de réception du canal (InCAM, OwnCAM, etc...)
+      */
+    function setChanelOperState( sChanel, sState) {
+      const id = "id" + sChanel + "_oper";
+      const element = document.getElementById( id);
+      if (element) {
+        if (isClass(element,'stdTextAlert')) {
+          element.classList.remove( "stdTextAlert");
+          try {
+            var playPromise = sound_ok.play();
+            if (playPromise !== undefined) {
+              playPromise.then(function() {
+                // Automatic playback started!
+                }).catch(function(error) {
+                // Automatic playback failed.
+                });
+              }
+            } catch(errSound) {}
+          }
+        element.innerText = sState;
+        }
+      }
+
+    /*
+      */
+    function setChanelOperStateMuted( sChanel) {
+      const id = "id" + sChanel + "_oper";
+      const element = document.getElementById( id);
+      if (element) {
+        if (isClass(element,'stdTextAlert') == false) {
+          element.classList.add( 'stdTextAlert');
+          try {
+            var playPromise = sound_nok.play();
+            if (playPromise !== undefined) {
+              playPromise.then(function() {
+                // Automatic playback started!
+                }).catch(function(error) {
+                // Automatic playback failed.
+                });
+              }
+            } catch(errSound) {}
+          }
+        }
+      }
+
+    /* initialise la carto. OpenStreeMap (OSM)
+      */
+    function initMap() {
+              
+      _sourceVectorStations = new ol.source.Vector({
+          features: new Array()
+          });
+
+      _layerVectorStation = new ol.layer.Vector({
+          source: _sourceVectorStations
+          })
+             
+      _sourceVectorMeasures = new ol.source.Vector({
+        visible: true,
+        features: new Array()
+        });
+
+      _layerVectorMeasures = new ol.layer.Vector({
+        visible: true,
+        source: _sourceVectorMeasures
+        });
+
+      _mapLayers["OSM"] = new ol.layer.Tile({
+        visible: true,
+        source: new ol.source.OSM()
+        });
+      /*
+      _mapLayers[ "stamen.toner"] = new ol.layer.Tile({
+        visible: false,
+        source: new ol.source.Stamen({
+          layer: 'toner'
+          })
+        });
+
+      try {
+          _mapLayers[ "stamen.hybrid"] = new ol.layer.Tile({
+            visible: false,
+            source: new ol.source.Stamen({
+              layer: 'toner-hybrid'
+              })
+            });
+          }
+      catch(err) {
+        _mapLayers[ "stamen.hybrid"] = _mapLayers["OSM"];
+        }
+      try {
+        _mapLayers[ "stamen.labels"] = new ol.layer.Tile({
+          visible: false,
+          source: new ol.source.Stamen({
+            layer: 'toner-labels'
+            })
+          });
+        }
+      catch(err) {
+        _mapLayers[ "stamen.labels"] = _mapLayers["OSM"];
+        }
+
+      try {
+        _mapLayers[ "stamen.lines"] = new ol.layer.Tile({
+          visible: false,
+          source: new ol.source.Stamen({
+            layer: 'toner-lines'
+            })
+          });
+        }
+      catch(err) {
+        _mapLayers[ "stamen.lines"] = _mapLayers["OSM"];
+        }
+
+      try {
+        _mapLayers[ "stamen.background"] = new ol.layer.Tile({
+          visible: false,
+          source: new ol.source.Stamen({
+            layer: 'toner-background'
+            })
+          });
+        }
+      catch(err) {
+        _mapLayers[ "stamen.background"] = _mapLayers["OSM"];
+        }
+
+      try {
+        _mapLayers[ "stamen.lite"] = new ol.layer.Tile({
+          visible: false,
+          source: new ol.source.Stamen({
+            layer: 'toner-lite'
+            })
+          });
+        }
+      catch(err) {
+        _mapLayers[ "stamen.lite"] = _mapLayers["OSM"];
+        }
+
+      _mapLayers[ "stamen.terrain"] = new ol.layer.Tile({
+        visible: false,
+        source: new ol.source.Stamen({
+          layer: 'terrain'
+          })
+        });
+      */
+      
+
+      // gestion de la carte
+      _map = new ol.Map({
+        layers: [
+          _mapLayers[ "OSM"],
+          /*_mapLayers[ "stamen.normal"],
+          _mapLayers[ "stamen.toner"],
+          _mapLayers[ "stamen.hybrid"],
+          _mapLayers[ "stamen.labels"],
+          _mapLayers[ "stamen.lines"],
+          _mapLayers[ "stamen.background"],
+          _mapLayers[ "stamen.lite"],
+          _mapLayers[ "stamen.terrain"],*/
+          _layerVectorStation, 
+          _layerVectorMeasures
+          ],
+        
+        target: document.getElementById("map"),
+        
+        controls: ol.control.defaults({
+          attributionOptions: {
+            collapsible: false
+            }
+          }),
+        view: new ol.View({
+          center: _lastLocation,
+          zoom: _lastZoom
+          })
+        });
+        
+      // echelle
+      var scaleLine = new ol.control.ScaleLine({
+        units: 'metric',
+        minWidth: 100
+        });
+
+      _map.addControl(scaleLine);
+            
+      _map.getView().setCenter( ol.proj.transform( _lastLocation, 'EPSG:4326', 'EPSG:3857'));
+      
+      _map.getView().on("change", function(event) {
+        var zoom = _map.getView().getZoom();
+        //displayStatus( new Date().yyyymmddhhmmsslll() +" > zoom is " + zoom);
+        });
+      
+      // zoom change
+      _map.on("Zoom", function() {
+        // A transformRoute function to convert coordinates from EPSG:3857
+        // to EPSG:4326.
+        _transformRoute = ol.proj.getTransform('EPSG:3857', 'EPSG:4326');
+        });
+
+      // map clic
+      _map.on('click', function(event) {   
+
+        displayFeatureInfo( event, event.pixel);
+
+        /*
+        // coordonnée du click
+        var clickPoint = new ol.Feature();
+        clickPoint.setGeometry( new ol.geom.Point( event.coordinate));
+        
+        var pointXY = clickPoint.getGeometry().getCoordinates();
+        var LonLat = pointToGeolocLonLat( pointXY);
+
+        $("#idLastPosition")[0].value = LonLat.toString();*/
+        });
+
+      // change mouse cursor when over marker
+      _map.on('pointermove', function(e) {
+        if (e.dragging) {
+          _transformRoute = ol.proj.getTransform('EPSG:3857', 'EPSG:4326');
+        
+          return;
+          }
+        const pixel = _map.getEventPixel(e.originalEvent);
+        const hit = _map.hasFeatureAtPixel(pixel);
+        if (hit) {
+          _map.getTarget().style.cursor = 'pointer';
+          }
+        else {
+          _map.getTarget().style.cursor = '';
+          }
+        //_map.getTarget().style.cursor = hit ? 'pointer' : '';
+        });
+
+      }
+
+    /* remove all signal measures
+      */
+    $('#btnMeasuresClear').on('click', function(event) {      
+      $('#chkMeasuresOn')[0].checked = false;
+      _acquireMeasureOn = false;
+
+      clearMeasures();
+
+      deleteAllChild( "idMesureStations");
+      });
+
+    /**/
+    const _bestRssiColor = fullColorHex(204, 255, 153);
+    const _badestRssiColor = fullColorHex(0, 0, 102);
+    const _bestRssiValue = -20;
+    const _badestRssiValue = -100;
+
+    function getRssiColor( rssi) {
+      var result = _badestRssiColor;
+      if (rssi >= _bestRssiValue) result = _bestRssiColor;
+      else if (rssi <= _badestRssiValue) result = _badestRssiColor;
+      else {
+        result = colorGradient( _bestRssiColor, _badestRssiColor, (rssi - _badestRssiValue) / (_bestRssiValue - _badestRssiValue));
+        }
+      return result;
+      }
+    
+    /* redraw measures on map
+      */
+    var _draws = [];
+    $("#idBtnRedrawStations").on('click', function(event) {      
+      do {
+        if (_measures.length == 0) break;
+
+        if (_measureStations.length == 0) {
+          parseMeasuresAndFilterStations( $("#idMesureStations")[0]);
+          }
+        if (_measureStations.length == 0) break;
+        
+        _sourceVectorMeasures.clear(true);
+        var features = _sourceVectorMeasures.getFeatures();
+
+        // purge des layers
+        _measures.forEach( function( measureRecord) {
+          if (isInArray( _measureStations, measureRecord.currentStation.id) 
+            && isInArray( _measureStations, measureRecord.hostStation.id)) {
+          
+            // AAA
+            var pseudoMsg = { 
+              'stationId': measureRecord.currentStation.id, 
+              'stationType': measureRecord.currentStation.type,
+              'latitude' : measureRecord.currentStation.lat,
+              'longitude' : measureRecord.currentStation.lon,
+              'altitude' : measureRecord.currentStation.alt,
+              'radioPower' : measureRecord.hostStation.RSSI,
+              'receivedAt' : measureRecord.timeStampBin
+              };
+              
+            manageStationOnMapFromLDM_CAM( pseudoMsg);            
+            declareStationInDico( pseudoMsg);
+            updateStationList( pseudoMsg);
+
+            var pseudoMsg = { 
+              'stationId': measureRecord.hostStation.id, 
+              'stationType': measureRecord.hostStation.type,
+              'latitude' : measureRecord.hostStation.lat,
+              'longitude' : measureRecord.hostStation.lon,
+              'altitude' : measureRecord.hostStation.alt,
+              'radioPower' : measureRecord.hostStation.RSSI,
+              'receivedAt' : measureRecord.timeStampBin
+              };
+            manageStationOnMapFromLDM_CAM( pseudoMsg);            
+            declareStationInDico( pseudoMsg);
+            updateStationList( pseudoMsg);
+
+            var point1 = new ol.geom.Point( ol.proj.fromLonLat( [ measureRecord.currentStation.lon, measureRecord.currentStation.lat] ));
+            var theFeature1 = new ol.Feature({
+              geometry: point1,
+              name: measureRecord.currentStation.id.toString()
+              });
+            theFeature1.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 5,
+                //fill: new ol.style.Fill({color: '#FF0000'}),
+                fill: new ol.style.Fill({color: '#' + getRssiColor( measureRecord.hostStation.RSSI)}),
+                stroke: new ol.style.Stroke({color: '#000000', width:0})
+                })
+              }) );
+            theFeature1.featureType = "measure.current";
+            theFeature1.featureData = measureRecord;
+            features.push( theFeature1);
+            //theFeature1.changed();
+
+            var point2 = new ol.geom.Point( ol.proj.fromLonLat( [ measureRecord.hostStation.lon, measureRecord.hostStation.lat] ));
+            var theFeature2 = new ol.Feature({
+              geometry: point2,
+              name: measureRecord.hostStation.id.toString()
+              });
+            theFeature2.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 5,
+                //fill: new ol.style.Fill({color: '#00FF00'}),
+                fill: new ol.style.Fill({color: '#' + getRssiColor( measureRecord.hostStation.RSSI)}),
+                stroke: new ol.style.Stroke({color: '#000000', width:0})
+                })
+              }) );
+            
+            var color = getRssiColor( measureRecord.hostStation.RSSI);
+
+            theFeature2.featureType = "measure.host";
+            theFeature2.featureData = measureRecord;
+            features.push( theFeature2);
+            //theFeature2.changed();
+            } 
+          });
+        
+        if (features.length > 0) {
+          _sourceVectorMeasures.addFeatures( features);
+          }
+        }
+      while(false);
+      });
+
+    /*
+      */
+    var _delayInterLDMForMeasure = 1000;
+    $('#btnMeasuresOn').on('click', function(event) {      
+      $('#chkMeasuresOn')[0].checked = true;
+      try {
+        _delayInterLDMForMeasure = 1000;
+        _delayInterLDMForMeasure = parseInt( $("#idDelayMsLDM")[0].value);
+        }
+      catch(err){}
+
+      _acquireMeasureOn = true;
+      });
+
+    /*
+      */
+    $('#btnMeasuresOff').on('click', function(event) {      
+      $('#chkMeasuresOn')[0].checked = false;
+      _acquireMeasureOn = false;
+      });
+
+    /*
+      */
+    $('#btnMeasuresSave').on('click', function(event) {      
+      dumpMeasures();
+      });
+
+    /*
+      */
+    $('#btnMeasuresLoad').on('click', function(event) {      
+      
+      // supprime toutes les stations
+      deleteAllChild( "idMesureStations");
+
+      document.getElementById("procMeasuresLoad").value = "";
+      var chooser = document.querySelector('#procMeasuresLoad');
+      try {
+        chooser.removeEventListener("change", processJsonMeasures);
+        }
+      catch(err) {}
+			chooser.addEventListener( "change", processJsonMeasures, false);
+			chooser.click();
+      });
+    
+    /*
+      */
+    function processJsonMeasures(evt) {
+			evt.stopPropagation();
+			evt.preventDefault();
+			processJsonMeasuresFile( evt.target.files[0]);
+      }
+    
+      
+    /*
+      
+    var openMeasuresFile = function(event) {
+      var input = event.target;
+
+      var reader = new FileReader();
+      reader.onload = function(){
+        var text = reader.result;
+        
+        try {
+          _measures = JSON.parse( text);
+          $('#idMeasuresCount').html( _measures.length.toString());
+          }
+        catch(err) {
+          logInList( "echec du chargement : " + err);
+          }
+        };
+      reader.readAsText(input.files[0]);
+      };*/
+
+    /**/
+    function parseMeasuresAndFilterStations( cellElement) {
+
+      _measures.forEach( function( element) {
+        var currSId = element.currentStation.id;
+        var hostSId = element.hostStation.id;
+        if (isInArray( _measureStations, currSId) == false) {
+          var newElement = document.createElement("input");
+          newElement.type = "checkbox"
+          newElement.stationId = currSId;
+          newElement.id = "opt_" + currSId;
+          newElement.addEventListener( 'change', measureStationSelectionChanged);
+          newElement.checked = true;
+          cellElement.appendChild( newElement);
+
+          var labElement = document.createElement("label");
+          labElement.innerText = " " + currSId.toString() + " (courante)";
+          cellElement.appendChild( labElement);
+
+          /*var aBr = document.createElement("br");
+          cellElement.appendChild( aBr);*/
+
+          _measureStations.push( currSId);
+          }
+
+        if (isInArray( _measureStations, hostSId) == false) {
+          var newElement = document.createElement("input");
+          newElement.type = "checkbox"
+          newElement.stationId = hostSId;
+          newElement.id = "opt_" + hostSId;
+          newElement.addEventListener( 'change', measureStationSelectionChanged);
+          newElement.checked = true;
+          cellElement.appendChild( newElement);
+          
+          var labElement = document.createElement("label");
+          labElement.innerText = " " + hostSId.toString() + " (distante)";
+          cellElement.appendChild( labElement);
+
+          /*var aBr = document.createElement("br");
+          cellElement.appendChild( aBr);*/
+
+          _measureStations.push( hostSId);
+          }
+        });
+      }
+
+
+		/**/
+		function processJsonMeasuresFile( fileDescriptor) {
+			
+			var r = new FileReader();
+			r.onload = function(e) {
+				try {
+          _measureStations = [];
+          _measures = JSON.parse( e.target.result);
+
+          $('#idMeasuresCount').html( _measures.length.toString());
+          //var cellElement = document.getElementById("idMesureStations");
+          // parser les mesures et déclarer les stations (voir la structure de measureData)
+
+          parseMeasuresAndFilterStations( $("#idMesureStations")[0]);
+
+          // <input type="checkbox" id="chkMeasuresOn"  style="background: white;"></input> 
+          }
+        catch(err) {
+          logInList( "echec du chargement : " + err);
+          }
+				}
+			r.readAsText( fileDescriptor, "text/plain;charset=utf-8");
+			}
+      
+    /**/
+    function measureStationSelectionChanged() {
+      if (this.checked) {
+        if (isInArray( _measureStations, this.stationId) == false) {
+          _measureStations.push( this.stationId);
+          }
+        }
+      else {
+        if (isInArray( _measureStations, this.stationId) == true) {
+          removeValueFromArray( _measureStations, this.stationId);
+          }
+        }
+      }
+
+    /*
+      */
+    $('.ol-zoom-in, .ol-zoom-out').tooltip({
+      placement: 'right'
+      });
+
+    /*
+      */
+    $('.ol-rotate-reset, .ol-attribution button[title]').tooltip({
+      placement: 'left'
+      });
+
+    /*
+      */
+    function manageStationOnMapFromLDM_CAM( camJsonData) {
+      
+      var features = _sourceVectorStations.getFeatures();
+      var idxFeature = isFieldInArray( features , "vehicleId", camJsonData["stationId"]);
+      var theFeature = null;
+      var previousCamJsonData = null;
+      var newLocation = [ camJsonData["longitude"], camJsonData["latitude"]];
+     
+      if (idxFeature == -1) {
+        
+        var theName = null;
+        if (camJsonData["stationType"] == 15) {
+          theName = "Station " + camJsonData["stationId"];
+          }
+        else {
+          theName = "Véhicle " + camJsonData["stationId"];
+          }
+          
+        theFeature = new ol.Feature({
+          geometry: new ol.geom.Point( ol.proj.fromLonLat( newLocation )),
+          name: theName
+          });
+        theFeature.vehicleId = camJsonData["stationId"];
+        theFeature.vehicleType = camJsonData["stationType"];
+        //if (theFeature.vehicleType == 5) return;
+        
+        theFeature.monType = "INFRA-BOX";
+        if (camJsonData["stationType"] == 15) {
+          theFeature.monSubType = "STRUCTURE";
+          }
+        else {
+          theFeature.monSubType = "MOBILE";
+          }
+          
+        theFeature.computed = {};
+        
+        theFeature.featureType = "station";
+        theFeature.camJson = camJsonData;
+        previousCamJsonData = camJsonData;
+        
+        var imgSrc = null;
+        if (theFeature.vehicleType == 15) {
+          imgSrc = './medias/box_road.png';
+          }
+        else {
+          imgSrc = './medias/vehicle-small.png';
+          }
+          
+        theFeature.setStyle(new ol.style.Style({
+          image: new ol.style.Icon( ({
+            anchor: [0.5, 0.5],
+            rotation: 0,
+            //color: '#8959A8',
+            color: '#FFFFFF',
+            crossOrigin: 'anonymous',
+            //src: './media/dot.png'
+            //src: 'https://openlayers.org/en/v4.6.5/examples/data/dot.png'
+            src: imgSrc
+            }))
+          }));
+          
+        var point = new ol.geom.Point( ol.proj.fromLonLat( newLocation ));
+
+        theFeature.setGeometry( point);
+          
+        _sourceVectorStations.clear(true);
+        features.push( theFeature);
+        _sourceVectorStations.addFeatures( features);
+        
+        _lastLocation = newLocation;
+        _map.getView().setCenter(ol.proj.transform( newLocation, 'EPSG:4326', 'EPSG:3857'));
+        
+       /* if (_currentFeature == null) {
+          _currentFeature = theFeature;
+          }*/
+        }
+      else {
+        theFeature = features[ idxFeature];
+        
+        previousCamJsonData = theFeature.camJson;
+        
+        theFeature.camJson = camJsonData;
+
+        var point = new ol.geom.Point( ol.proj.fromLonLat( newLocation ));
+        theFeature.setGeometry( point);
+        }
+        
+      var previousPos = [ previousCamJsonData["longitude"], previousCamJsonData["latitude"] ];
+      var newPos = [ theFeature.camJson["longitude"], theFeature.camJson["latitude"] ];
+      
+      theFeature.computed["distance"] = parseFloat( ol.sphere.getDistance( newPos, previousPos)).toFixed( 3); 
+      
+      var prevLatLon = new LatLon( previousCamJsonData["longitude"], previousCamJsonData["latitude"]);
+      var newLatLon = new LatLon( theFeature.camJson["longitude"], theFeature.camJson["latitude"]);
+      
+      var bearing = 0;
+      if (camJsonData["stationType"] != 15) {
+        bearing = prevLatLon.bearingTo( newLatLon);
+
+        theFeature.computed["orientation"] = parseFloat( bearing);
+        camJsonData["orientation"] = parseFloat( bearing);
+
+        if (bearing != 0) {
+          theFeature.getStyle().getImage().setRotation( bearing.toRadians());
+          }
+        }
+      theFeature.changed();
+      }
+
+
+
+    var _acquireMeasureOn = false;
+    var _acquiredMeasureDisplayed = false;
+
+    /*
+      */
+    function dumpMeasures() {
+      var str = JSON.stringify(_measures);
+      var fileName = "nexo-measures-" + new Date().yyyymmddhhmmss() + ".json";
+      saveTextAsFile( str, fileName, ".json");
+      }
+
+    /*
+      */
+    function clearMeasures() {
+      _sourceVectorMeasures.clear(true);
+      _measures = [];
+      _measureStations = [];
+      $('#idMeasuresCount').html( _measures.length.toString());
+      }
+
+    /* sChanel : "LDMInfoCAM" (pour l'instant)    
+      */
+    function addMeasures( sChanel, currentStationData, receivedStationData) {
+
+      if (_acquireMeasureOn == false) return;
+
+      /* stationId, newLocation, RSSI, distance
+      var newLocation = [ camJsonData["longitude"], camJsonData["latitude"]];
+      camJsonData["stationId"], newLocation, camJsonData["radioPower"], camJsonData["distance"]*/
+
+      var now = new Date();
+      for(var i = _measures.length; i--;) {
+        if (_measures[i].currentStation.id == currentStationData['stationId']
+          && _measures[i].hostStation.id == receivedStationData['stationId']) {
+          var diffInMs = Math.abs( now.getTime() - _measures[i].timeStampBin.getTime());
+          if (diffInMs < _delayInterLDMForMeasure) return;
+          else break;
+          }
+        }
+
+      var measureData = { 
+        'timeStamp' : new Date().yyyymmddhhmmsslll(),
+        'timeStampBin' : new Date(),
+
+        'currentStation' : { 'id': currentStationData['stationId'], 
+          'type': currentStationData['stationType'], 
+          'lat': currentStationData['latitude'], 
+          'lon': currentStationData['longitude'], 
+          'alt': currentStationData['altitude']}, 
+
+        'hostStation' : {'id': receivedStationData['stationId'], 
+          'type': receivedStationData['stationType'], 
+          'lat': receivedStationData['latitude'], 
+          'lon': receivedStationData['longitude'], 
+          'alt': receivedStationData['altitude'],
+          'RSSI': receivedStationData['radioPower'],
+          'distance': receivedStationData['distance']
+          } 
+        };
+
+      _measures.push( measureData);
+
+      $('#idMeasuresCount').html( _measures.length.toString());
+      }
+    
+    /* affichage des etat des feux
+      */
+    function addNewLight( sWay, stationId, lightId, sState, nDelay) {
+
+      var keyLight = stationId.toString() + "_" + lightId.toString();
+
+      // ATESTER
+      var now = new Date();
+      //_lastSPAT.push( { 'key': keyLight, 'stamp': now.getTime() } );
+      _lastSPAT[ keyLight] = now.getTime();
+
+      var feuxArea = document.getElementById("idFeuxArea");
+      var feuDiv = null;
+      var feuDivImg = null;
+      var feuDivDelayLabel = null;
+      var feuDivSignalGroupLabel = null;
+      var feuDivPos = 0;
+
+      for( var idx=0; idx < feuxArea.children.length; idx++) {
+        feuDivElem = feuxArea.children[idx];
+        feuDivPos = feuDivPos + 150;
+        if (feuDivElem.id == "idDivSignal_" + keyLight) {
+          feuDiv = feuDivElem;
+          break;
+          }
+        }
+        
+      if (feuDiv == null) {        
+        feuDiv = document.createElement("div");
+        feuDiv.id = "idDivSignal_" + keyLight;
+        feuDiv.style += "width:200px; border: solid 1px #808080; display: inline-block; left:" + feuDivPos.toString();
+        feuxArea.appendChild( feuDiv);
+        
+        feuDivSignalGroupLabel = document.createElement("label");
+        feuDivSignalGroupLabel.id = "idDivSignalGroupTxt_" + keyLight;      
+        feuDivSignalGroupLabel.style += "height:30px; text-align:center; font-family:Calibri; font-size: 14px; font-weight: bold;";
+        feuDiv.appendChild( feuDivSignalGroupLabel);
+        feuDivSignalGroupLabel.innerText = sWay + "Signal " + keyLight;
+
+        var aBr = document.createElement("br");
+        feuDiv.appendChild( aBr);
+
+        feuDivImg = document.createElement("img");
+        feuDivImg.id = "idDivImg_" + keyLight;      
+        feuDivImg.style += "width:50%; height:100px; inline-block; left:0;"
+        feuDiv.appendChild( feuDivImg);
+        
+        feuDivDelayLabel = document.createElement("label");
+        feuDivDelayLabel.id = "idDivDelayTxt_" + keyLight;      
+        feuDivDelayLabel.style += "width:50%; inline-block; right:0;"
+        feuDiv.appendChild( feuDivDelayLabel);
+        }
+      else {
+        feuDivImg = document.getElementById( "idDivImg_" + keyLight);
+        feuDivDelayLabel = document.getElementById( "idDivDelayTxt_" + keyLight);
+        }
+      var sPic = "feu_none.png";
+      if (sState == "stop-And-Remain") sPic = "feu_rouge.png";
+      else if (sState == "stop-Then-Proceed") sPic = "feu_rouge.png";
+
+      else if (sState == "protected-Movement-Allowed") sPic = "feu_vert.png";
+      else if (sState == "pre-Movement") sPic = "feu_jaune_blink.png";
+      else if (sState == "permissive-Movement-Allowed") sPic = "feu_vert_blink.png";
+     
+      else if (sState == "permissive-clearance") sPic = "feu_jaune.png";
+      else if (sState == "protected-clearance") sPic = "feu_jaune.png";
+      else if (sState == "caution-Conflicting-Traffic") sPic = "feu_jaune_blink.png";
+
+      else if (sState == "unavailable") sPic = "feu_none.png";
+      else if (sState == "dark") sPic = "feu_noir.png";
+      feuDivImg.src = "./medias/" + sPic;
+
+      if (nDelay == -1) {
+        // no value 
+        feuDivDelayLabel.innerText = "***";
+        }
+      else {
+        feuDivDelayLabel.innerText = nDelay.toFixed(0).toString(); // .padStart(4, '0');
+        }
+      }
+
+    /* afficher des infos sur l'élément cliqué
+      */
+    var displayFeatureInfo = function( event, pixel) {
+      
+      var btn = whichMouseButton( event);
+      var xMap = document.getElementById("map");
+      var mapRect = xMap.getBoundingClientRect();
+
+      var feature = _map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+        return feature;
+        });
+
+      var xFeatures = _sourceVectorMeasures.getFeatures();
+      
+      if (feature != undefined) {
+        _infoToolTip.css({
+          /*left: (pixel[0] -15 + xMap.offsetLeft) + 'px',
+          top: (pixel[1] - 15 + xMap.offsetTop) + 'px'*/
+          left: (pixel[0] + mapRect.left) + 'px',
+          top: (pixel[1] + mapRect.top) + 'px'
+          });
+
+        // UBR et UEV
+        // if (feature.camJson != null) {
+        if (feature.featureType == "station") {
+          // titre : ID + radioPower
+          var infoTxt = "ID:" + feature.camJson.stationId.toString();
+          if (feature.camJson.stationType != 15
+            && feature.camJson.hasOwnProperty('radioPower')) {
+            infoTxt += "\n"
+            + "RSSI:" + feature.camJson["radioPower"];
+            }
+
+          _infoToolTip.stationId = feature.camJson["stationId"];
+          _infoToolTip.radioPower = feature.camJson["radioPower"];
+          _infoToolTip.tooltip('hide')
+            .attr('data-original-title', infoTxt)
+            .tooltip('fixTitle')
+            .tooltip('show');
+          return;
+          }
+
+        // si on a sélectionné une ligne de franchissement
+        if (feature.featureType = "franchissementLine" 
+          && _stepModifLigne == null) {
+
+           var infoTxt = feature.values_.name;
+          _infoToolTip.tooltip('hide')
+            .attr('data-original-title', infoTxt)
+            .tooltip('fixTitle')
+            .tooltip('show');
+
+          // FPI
+          _dataLineSelected = feature.values_.data;
+          _dataLineModified = _dataLineSelected;
+          $("#idLine_Nom").val ( _dataLineSelected.Nom);
+          $("#idLine_RessNum").val( _dataLineSelected.RessNum);
+          $("#LigneFranchissementPoint1").text( _dataLineSelected.Franchiss0.toString());
+          $("#LigneFranchissementPoint2").text( _dataLineSelected.Franchiss1.toString());
+          $("#LigneDirectionPoint1").text( _dataLineSelected.AxeVehi0.toString());
+          $("#LigneDirectionPoint2").text( _dataLineSelected.AxeVehi1.toString());
+
+          $("#btnLigneFranchissementModif")[0].disabled = false;
+          $("#btnLigneDirectionModif")[0].disabled = false;
+          $("#btnLignesDetectionValider")[0].disabled = false;
+          $("#btnLignesDetectionSave")[0].disabled = false;
+          _stepModifLigne = "selected";
+
+          return;
+          }
+        if (feature.featureType = "directionLine"
+          && _stepModifLigne == null) {
+          
+            // FPI
+          var infoTxt = feature.values_.name;
+          _infoToolTip.tooltip('hide')
+            .attr('data-original-title', infoTxt)
+            .tooltip('fixTitle')
+            .tooltip('show');
+
+          _dataLineSelected = feature.values_.data;
+          _dataLineModified = _dataLineSelected;
+          $("#idLine_Nom").val ( _dataLineSelected.Nom);
+          $("#idLine_RessNum").val( _dataLineSelected.RessNum);
+          $("#LigneFranchissementPoint1").text( _dataLineSelected.Franchiss0.toString());
+          $("#LigneFranchissementPoint2").text( _dataLineSelected.Franchiss1.toString());
+          $("#LigneDirectionPoint1").text( _dataLineSelected.AxeVehi0.toString());
+          $("#LigneDirectionPoint2").text( _dataLineSelected.AxeVehi1.toString());
+
+          $("#btnLigneFranchissementModif")[0].disabled = false;
+          $("#btnLigneDirectionModif")[0].disabled = false;
+          $("#btnLignesDetectionValider")[0].disabled = false;
+          $("#btnLignesDetectionSave")[0].disabled = false;
+          _stepModifLigne = "selected";
+
+          return;
+          }
+
+        // des mesures
+        if (feature.featureType == "measure.current"
+          || feature.featureType == "measure.host") {
+
+          var jsnData = feature.featureData;
+          var infoTxt = "entre " + jsnData.currentStation.id + 
+            " et " + jsnData.hostStation.id + " : " + jsnData.hostStation.RSSI;
+          _infoToolTip.tooltip('hide')
+            .attr('data-original-title', infoTxt)
+            .tooltip('fixTitle')
+            .tooltip('show');
+          return;
+          }
+        } 
+      else {
+        _infoToolTip.tooltip('hide');
+        _infoToolTip.stationId = -1;
+        }
+
+      /* selection hors objet sur la carte */
+      var clickPoint = new ol.Feature();
+      clickPoint.setGeometry( new ol.geom.Point( event.coordinate));
+        
+      var pointXY = clickPoint.getGeometry().getCoordinates();
+      var LonLat = pointToGeolocLonLat( pointXY);
+      if (_stepModifLigne == "modif.franchissement.point1") {
+        _dataLineModified.Franchiss0 = LonLat;
+        $("#LigneFranchissementPoint1").text( _dataLineModified.Franchiss0.toString());
+        _stepModifLigne = "modif.franchissement.point2";
+        $("#btnLigneFranchissementModif")[0].disabled = true;
+        $("#btnLigneDirectionModif")[0].disabled = true;
+        $("#btnLignesDetectionValider")[0].disabled = true;
+        $("#btnLignesDetectionSave")[0].disabled = true;
+        }
+      else if (_stepModifLigne == "modif.franchissement.point2") {
+        _dataLineModified.Franchiss1 = LonLat;
+        $("#LigneFranchissementPoint2").text( _dataLineModified.Franchiss1.toString());
+        _stepModifLigne = "selected";
+        $("#btnLigneFranchissementModif")[0].disabled = false;
+        $("#btnLigneDirectionModif")[0].disabled = false;
+        $("#btnLignesDetectionValider")[0].disabled = false;
+        $("#btnLignesDetectionSave")[0].disabled = false;
+        }
+      else if (_stepModifLigne == "modif.direction.point1") {
+        _dataLineModified.AxeVehi0 = LonLat;
+        $("#LigneDirectionPoint1").text( _dataLineModified.AxeVehi0.toString());
+        _stepModifLigne = "modif.direction.point2";
+        $("#btnLigneFranchissementModif")[0].disabled = true;
+        $("#btnLigneDirectionModif")[0].disabled = true;
+        $("#btnLignesDetectionValider")[0].disabled = true;
+        $("#btnLignesDetectionSave")[0].disabled = true;
+        }
+      else if (_stepModifLigne == "modif.direction.point2") {
+        _dataLineModified.AxeVehi1 = LonLat;
+        $("#LigneDirectionPoint2").text( _dataLineModified.AxeVehi1.toString());
+        _stepModifLigne = "selected";
+        $("#btnLigneFranchissementModif")[0].disabled = false;
+        $("#btnLigneDirectionModif")[0].disabled = false;
+        $("#btnLignesDetectionValider")[0].disabled = false;
+        $("#btnLignesDetectionSave")[0].disabled = false;
+        }
+      else if (_stepModifLigne == "selected") {
+        _dataLineSelected = null;
+        _dataLineModified = null;
+        $("#idLine_Nom").val ( "");
+        $("#idLine_RessNum").val( "");
+        $("#LigneFranchissementPoint1").text( "");
+        $("#LigneFranchissementPoint2").text( "");
+        $("#LigneDirectionPoint1").text( "");
+        $("#LigneDirectionPoint2").text( "");
+        
+        $("#btnLigneFranchissementModif")[0].disabled = true;
+        $("#btnLigneDirectionModif")[0].disabled = true;
+        $("#btnLignesDetectionValider")[0].disabled = true;
+        $("#btnLignesDetectionSave")[0].disabled = true;
+
+        _stepModifLigne = null;
+        }
+
+      /*
+      if (_zoneStep == "createZone") {
+        var clickPoint = new ol.Feature();
+        clickPoint.setGeometry( new ol.geom.Point( event.coordinate));
+        
+        var pointXY = clickPoint.getGeometry().getCoordinates();
+        var LonLat = pointToGeolocLonLat( pointXY);
+        _currentZone.routePoints.push( LonLat);
+        
+        _currentLineLayer = clearLayer( _currentLineLayer);
+        _currentLineLayer = drawZone( _currentZone, '#00FF00');
+        _map.addLayer( _currentLineLayer);
+        }*/
+ 
+      /*
+      // est-on dans une zone
+      if (true) {
+        var clickPoint = new ol.Feature();
+        clickPoint.setGeometry( new ol.geom.Point( event.coordinate));
+          
+        var pointXY = clickPoint.getGeometry().getCoordinates();
+        var LonLat = pointToGeolocLonLat( pointXY);
+
+       
+        $("#idZoneId")[0].value = "";
+        $("#idZoneRegion")[0].value = "";
+        $("#idZoneSignalGroup")[0].value = "";
+        _selectedZone = null;
+        for( var i=0; i < _zones.length; i++) {
+          if (isPointInPoly( LonLat, _zones[i].routePoints))  {
+            
+            $("#idZoneId")[0].value = _zones[i].id.toString();
+            $("#idZoneRegion")[0].value = _zones[i].region.toString();
+            $("#idZoneSignalGroup")[0].value = _zones[i].signal.toString();
+
+            _selectedZone = _zones[i];
+            break;
+            }
+          }
+        }*/
+
+      };
+
+    /*
+      */
+    function pointToGeolocLonLat( pointXY) {
+      var report = ol.proj.transform( pointXY, 'EPSG:3857', 'EPSG:4326');
+      return report;
+      }
+
+    /*
+      */
+    function geolocLonLatToPoint( LonLat) {
+      var report = ol.proj.transform( LonLat, 'EPSG:4326', 'EPSG:3857');
+      return report;
+      }
+
+    // selection d'une ligne de la table
+    /*
+      */
+    var _previousClickedStation = null;
+    function StationListClick(element) {
+
+      _infoToolTip.tooltip('hide');
+
+      if (isClass(element.currentTarget, 'selected')) element.currentTarget.classList.remove('selected');
+      else element.currentTarget.classList.add('selected');
+
+      if (_previousClickedStation != null) {
+        _previousClickedStation.classList.remove( 'selected');
+        _previousClickedStation = null;
+        }
+
+      var sId = element.currentTarget.data['stationId'];
+      var nLatitude = element.currentTarget.data['latitude'];
+      var nLongitude = element.currentTarget.data['longitude'];
+
+      _previousClickedStation = element.currentTarget;
+
+      var newLocation = [ nLongitude, nLatitude ];
+			_map.getView().setCenter( ol.proj.transform( newLocation, 'EPSG:4326', 'EPSG:3857'));
+      }
+
+    /* mecanisme standard pour uploader un fichier, et afficher le bilan dans reportElement
+      element : formulaire "form"
+      URL : commande à envoyer à nodejs pour indiquer de quel upload il s'agit
+      reportElement : label dans lequel on affichera le resultat de l'upload
+      */
+    function processUpload( element, URL, reportElement) {
+      var form = element;
+      var formdata = false;
+      if (window.FormData){
+        formdata = new FormData(form[0]);
+        }
+      reportElement[0].innerText = "";
+      var formAction = form.attr('action');
+      $.ajax({
+        url         : URL,
+        data        : formdata ? formdata : form.serialize(),
+        cache       : false,
+        contentType : false,
+        processData : false,
+        type        : 'POST',
+        beforeSend:function(){},
+        error : function( xhr, textStatus, errorThrown) {
+          logInList(textStatus + ": " + errorThrown);
+          },
+        success     : function( response) {
+          logInList( response); 
+          var jsnResponse = JSON.parse( response);
+          reportElement[0].innerText = jsnResponse.comment;
+          },
+        complete: function( jqXHR, textStatus) {}
+        });
+      }
+
+    /*
+      */
+    $('#spatModuleParamToUpload').submit( function( event) {
+      processUpload( $(this), "/spatModuleParamToUpload", $('#spatModuleParamToUploadReport') );
+      return false;
+      });
+
+    /*
+      */
+    $('#spatModuleParamToDownload').click(function() {
+      sendHttpGetFile( "/spatModuleParamToDownload", "spat_mobile_params.xml", process_spat_mobile_params_xml);
+      return false;
+      });
+
+    /* charge le fichier /root/map_param.json et l'affiche sur un nouvel onglet
+      */
+    $('#mapFileToDownload').click(function() {
+      sendHttpGetFile( "/mapFileToDownload", "map_params.json", process_map_params_json);
+      return false;
+      });
+
+    /* charge le fichier /var/syslog et l'affiche sur un nouvel onglet
+      */
+    $('#syslogToDownload').click(function() {
+      var sizeInBytes = parseInt( $("#idLogSizeToDownload")[0].value);
+      var filePath = "/var/log/syslog";
+      var request = "/filePartToDownload?" + 
+        "sizeInBytes=" + sizeInBytes.toString() +
+        "&filePath=" + filePath;
+      sendHttpGetFile( request, filePath, process_file_part);
+      return false;
+      });
+
+    
+    /* charge le fichier /var/debug et l'affiche sur un nouvel onglet
+      */
+    $('#var_log_debuglogToDownload').click(function() {
+      var sizeInBytes = parseInt( $("#idLogSizeToDownload")[0].value);
+      var filePath = "/var/log/debug";
+      var request = "/filePartToDownload?" + 
+        "sizeInBytes=" + sizeInBytes.toString() +
+        "&filePath=" + filePath;
+      sendHttpGetFile( request, filePath, process_file_part);
+      return false;
+      });
+    
+    /*
+      */
+    $('#daemonlogToDownload').click(function() {
+      var sizeInBytes = parseInt( $("#idLogSizeToDownload")[0].value);
+      var filePath = "/var/log/daemon.log";
+      var request = "/filePartToDownload?" + 
+        "sizeInBytes=" + sizeInBytes.toString() +
+        "&filePath=" + filePath;
+      sendHttpGetFile( request, filePath, process_file_part);
+      return false;
+      });
+    
+    /*
+      */
+    $('#spatMobileInfosToDownload').click(function() {
+      var sizeInBytes = parseInt( $("#idLogSizeToDownload")[0].value);
+      var filePath = "/var/run/spat_mobile_infos.json";
+      var request = "/filePartToDownload?" + 
+        "sizeInBytes=" + sizeInBytes.toString() +
+        "&filePath=" + filePath;
+      sendHttpGetFile( request, filePath, process_file_part);
+      return false;
+      });
+
+    /* que faire quand on reçoit le fichier map_param.json
+      */
+    function process_map_params_json( fileDescription, fileContent) {
+      var newWindow = window.open("", "_blank");      
+      newWindow.focus();
+      var xStyle = "'width:1024; height:800; -moz-tab-size : 2; -o-tab-size : 2; tab-size : 2;'";
+      newWindow.document.write( "<label>map_params.json</label>");
+      newWindow.document.write( "<br>");
+      newWindow.document.write( "<textArea id='idText' style=" + xStyle + "></textArea>" );
+      newWindow.document.getElementById( 'idText').value = fileContent;
+      }
+
+    /*
+      */
+    function process_spat_mobile_params_xml( fileDescription, fileContent) {
+      var newWindow = window.open("", "_blank");      
+      newWindow.focus();
+      var xStyle = "'width:1024; height:800; -moz-tab-size : 2; -o-tab-size : 2; tab-size : 2;'";
+      newWindow.document.write( "<label>" + fileDescription + "</label>");
+      newWindow.document.write( "<br>");
+      newWindow.document.write( "<textArea id='idText' style=" + xStyle + "></textArea>" );
+      newWindow.document.getElementById( 'idText').value = fileContent;
+      /*newWindow.document.write( "<label>spat_mobile_appli.xml</label><br><textArea id='idText' style='width:1024; height:800;'></textArea>" );
+      newWindow.document.getElementById( 'idText').value = fileContent;*/
+      }
+
+    /*
+      */
+    function process_file_part( fileDescription, HttpResponseText) {
+      
+      var newValue = "";
+      try {
+        var jsnResponse = JSON.parse( HttpResponseText);
+        newValue = jsnResponse.comment;
+        }
+      catch(err) {
+        newValue = err;
+        }      
+
+      var newWindow = window.open("", "_blank");      
+      newWindow.focus();
+      var xStyle = "'width:1024; height:800; -moz-tab-size : 2; -o-tab-size : 2; tab-size : 2;'";
+      newWindow.document.write( "<label>" + fileDescription + "</label>");
+      newWindow.document.write( "<br>");
+      newWindow.document.write( "<textArea id='idText' style=" + xStyle + "></textArea>" );
+      newWindow.document.getElementById( 'idText').value = newValue;
+      }
+
+    /* decale un point en ajoutant l'offset
+      */
+    function applyOffset( pointLonLat, offsetLonLat) {
+      return [ pointLonLat[0] + offsetLonLat[0], pointLonLat[1] + offsetLonLat[1]];
+      }
+
+    /* analyse le fichier spat_params
+      affiche les lignes de franchissement
+      */
+    var _dataLines = [];
+    // ligne sélectionnée
+    var _dataLineSelected = null;
+    var _dataLineModified = null;
+
+    function process_extractAndDrawLignesPrio( fileDescription, HttpResponseText) {
+      do {        
+        // clear layers
+        clearLinePrioLayers();
+        _dataLines = [];
+
+        // localise le contenu du fichier
+        var fileContent = HttpResponseText;
+        /*if (HttpResponseText.startsWith('<?xml version="1.0"?>\n')) {
+          HttpResponseText = HttpResponseText.replaceAll('<?xml version="1.0"?>\n', '');
+          }*/
+
+        // conversion en arbre xml
+        var xmlDoc = null;
+        try {
+          var parser = new DOMParser();
+          xmlDoc = parser.parseFromString( fileContent, "text/xml");
+          }
+        catch(err ){
+          logInList( "analyse des lignes de priorité : " + err);
+          break;
+          }
+
+        var nodeParametres = xmlDoc.getElementsByTagName("Parametres");
+        if (nodeParametres == null) break;
+        if (nodeParametres.length != 1) break;
+        nodeParametres = nodeParametres[0];
+
+        var nodeGeneral = nodeParametres.getElementsByTagName("General");
+        if (nodeGeneral == null) break;
+        if (nodeGeneral.length == 0) break;
+        nodeGeneral = nodeGeneral[0];
+        var decalageLatiCoordZones = 0;
+        var decalageLongiCoordZones = 0;
+        for( var i=0; i < nodeGeneral.children.length; i++) {
+          if (nodeGeneral.children[i].nodeName == 'DecalageLatiCoordZones') decalageLatiCoordZones = parseFloat( nodeGeneral.children[i].textContent);
+          if (nodeGeneral.children[i].nodeName == 'DecalageLongiCoordZones') decalageLongiCoordZones = parseFloat( nodeGeneral.children[i].textContent);
+          }
+        var offset = [decalageLongiCoordZones, decalageLatiCoordZones];
+        
+        var nodeZonesDetections = nodeParametres.getElementsByTagName("ZonesDetections");
+        if (nodeZonesDetections == null) break;
+        if (nodeZonesDetections.length == 0) break;
+        nodeZonesDetections = nodeZonesDetections[0];
+
+        for( var i=0; i < nodeZonesDetections.children.length; i++) {
+          var nodeZone = nodeZonesDetections.children[i];
+          if (nodeZone.nodeName == "ZoneDetection") {
+            // FPI
+            var Nom = nodeZone.getAttribute('Nom');
+
+            var MaskVehZone = nodeZone.getAttribute('MasqueGroupesVehicules');
+
+            var Franchiss0 = [ parseFloat(nodeZone.getAttribute('Franchiss0Longi')), parseFloat( nodeZone.getAttribute('Franchiss0Lati')) ];
+            //Franchiss0 = applyOffset( Franchiss0, offset);
+
+            var Franchiss1 = [ parseFloat(nodeZone.getAttribute('Franchiss1Longi')), parseFloat( nodeZone.getAttribute('Franchiss1Lati')) ];
+            //Franchiss1 = applyOffset( Franchiss1, offset);
+
+            var AxeVehi0 = [ parseFloat(nodeZone.getAttribute('AxeVehi0Longi')), parseFloat( nodeZone.getAttribute('AxeVehi0Lati')) ];
+            //AxeVehi0 = applyOffset( AxeVehi0, offset);
+
+            var AxeVehi1 = [ parseFloat(nodeZone.getAttribute('AxeVehi1Longi')), parseFloat( nodeZone.getAttribute('AxeVehi1Lati')) ];
+            //AxeVehi1 = applyOffset( AxeVehi1, offset);
+
+            var RessNum = nodeZone.getAttribute('RessNum');
+
+            var RessType = nodeZone.getAttribute('RessType');
+
+            // dessine le T
+            var dataLine = { 'row': i, 
+              'id': newGuid(),
+              'Franchiss0' : Franchiss0, 'Franchiss1' : Franchiss1, 'AxeVehi0' : AxeVehi0, 'AxeVehi1': AxeVehi1, 
+              'Nom': Nom,
+              'MasqueGroupesVehicules': MaskVehZone,
+              'RessNum': RessNum,
+              'RessType': RessType };
+
+            _dataLines.push( dataLine);
+            }
+          }
+        
+        drawLoadedLines( );
+
+        centerOnLines();
+
+        $("#btnLigneFranchissementModif")[0].disabled = true;
+        $("#btnLigneDirectionModif")[0].disabled = true;
+        $("#btnLignesDetectionValider")[0].disabled = true;
+        $("#btnLignesDetectionSave")[0].disabled = true;
+        }
+      while(false);
+      }
+
+    /*
+      */
+    function drawLoadedLines() {
+
+      clearLinePrioLayers();
+
+      for( var i=0; i < _dataLines.length; i++) {
+        var dataLine = _dataLines[i];
+
+        // return { 'layerFranchiss' : layer, 'layerAxeVehi' : layer }
+        var newLayers = drawLinePrio( dataLine, '#FF00FF');
+        _layerLinePrio.push( newLayers.layerFranchiss);
+        _map.addLayer( newLayers.layerFranchiss);
+
+        _layerLinePrio.push( newLayers.layerAxeVehi);
+        _map.addLayer( newLayers.layerAxeVehi);    
+        }
+      }
+
+    /*
+      */
+    $('#mapFileToUpload').submit( function( event) {        
+      processUpload( $(this), "/mapFileToUpload", $('#mapFileToUploadReport') );
+      return false;
+      });
+
+    /*
+      */
+    $('#spatProgToUpload').submit( function( event) {
+      processUpload( $(this), "/spatProgToUpload", $('#spatProgToUploadReport') );
+      return false;
+      });
+	  
+	  $('#execFilesToUpload').submit( function( event) {
+      processUpload( $(this), "/execFilesToUpload", $('#execFilesToUploadReport') );
+      return false;
+      });
+
+    /* collecte des dernières informations (camJsonData) reçues d'une station
+      */
+    function declareStationInDico( camJsonData) {
+      var foundStation = null;
+      for( var s=0; s < _stations.length; s++ ) {
+        if (_stations[s].stationId == camJsonData.stationId) {
+          foundStation = _stations[s];
+          break;
+          }
+        }
+      if (foundStation == null) {
+        _stations.push( camJsonData);
+        try {
+          sound_ok.play();
+          } catch(errSound) {}
+        }
+      else {
+        // merge des données
+        for(var key2 in camJsonData) {
+          var keyFound = false;
+          for( var key1 in foundStation) {
+            if (key2 == key1) {
+              keyFound = true;
+              foundStation[key1] = camJsonData[key1];
+              break;
+              }
+            }
+          if (keyFound == false) {
+            foundStation[key2] = camJsonData[key1];
+            }
+          }
+        }
+      }
+
+    /*
+      */
+    function getStationDataInDico( stationId) {
+      var found = null;
+      for( var s=0; s < _stations.length; s++ ) {
+        if (_stations[s].stationId = stationId) {
+          found = _stations[s];
+          break;
+          }
+        }
+      return found;
+      }
+
+    /*
+      */
+    function addStationClock( camJsonData) {
+
+      if (camJsonData['stationLastClockBin'] == null) return;
+
+      var found = null;
+      for( var i = 0; i < _stationClock.length; i++) {
+        if (_stationClock[i].stationId == camJsonData.stationId) {
+          _stationClock[i].stationLastClock = camJsonData.stationLastClock;
+          return;
+          }
+        }
+      _stationClock.push( { 'stationId': camJsonData.stationId, 'stationLastClockBin': camJsonData.stationLastClockBin});
+      }
+
+    /*
+      */
+    function getStationLastClock( stationId) {
+      for( var i = 0; i < _stationClock.length; i++) {
+        if (_stationClock[i].stationId == stationId) {
+          return _stationClock[i].stationLastClockBin;
+          }
+        }
+      return null;
+      }
+
+    /* Detecte si une station ou un canal de communication est silencieux
+      */
+    function timerScanStationLifeCallback() {
+      
+      for( var s=0; s < _stations.length; s++) {
+        try {
+          var now = new Date();
+          if (_stations[s]['stationLastClockBin'] == null) continue;
+          var lastSign = new Date( _stations[s].stationLastClockBin);
+          var diffInMs = Math.abs( now.getTime() - lastSign.getTime());
+          if (diffInMs > _delaiSilenceBase) {
+            updateStationLifeSign( _stations[s], "nok");
+            }
+          else {
+            updateStationLifeSign( _stations[s], "ok");
+            }
+          }
+        catch(err) {}
+        }
+
+      scanLDMSStations();
+
+      _timerScanStationLifeHdl = setTimeout( timerScanStationLifeCallback, _timerScanStationLifeDelay);
+      }
+
+    /* détecte depuis quand on n'a pas reçu de SPaT
+      */    
+    function timerScanSpatCallback( ) {
+      
+      // ATESTER
+      var now = new Date();
+      for( elemSPAT in _lastSPAT) {
+        var keyLight = elemSPAT;
+        var feuDiv = document.getElementById("idDivSignal_" + keyLight);
+
+        var diffInMs = Math.abs( now.getTime() - _lastSPAT[ elemSPAT]);
+        if (diffInMs > _timerScanSpatDelay) {
+  
+          if (feuDiv != null) {
+            feuDiv.style[ "background-color"] = "red";
+            }
+          }
+        else {
+          if (feuDiv != null) {
+            feuDiv.style[ "background-color"] = "white";
+            }
+          }
+        }
+
+      _timerScanSpat = setTimeout( timerScanSpatCallback, _timerScanSpatDelay);
+      }
+
+    /* trace les events LDM
+      */
+
+    var _mapStation = [];
+    var _mapStationMessage = [];
+
+    /* la station a t'elle recu des LDM récemment
+      */
+    function isStationLDM( stationId) {
+      var report = false;
+      for( let element of _mapStation) {
+        if (element.stationId == stationId) {
+          report = element.connected;
+          break;
+          }
+        }
+      return report;
+      }
+
+    /* recherche si il y a un enregistrement pour (station)
+      */
+    function getStationInMapLDM( stationId) {
+      //var report = _mapStation.forEach( function( element) {
+      var report = null;
+      for( let element of _mapStation) {
+        if (element.stationId == stationId) {
+          report = element;
+          break;
+          }
+        }
+      return report;
+      }
+
+    /* recherche si il y a un enregistrement pour le couple (station,type de message)
+      */
+    function getStationAndMessageInMapLDM( stationId, message) {
+      //var report = _mapStationMessage.forEach( function( element) {
+      var report = null;
+      for( let element of _mapStationMessage) {
+        if (element.stationId == stationId
+          && element.message == message) {
+          report = element;
+          break;
+          }
+        }
+      return report;
+      }
+
+    /* mise à jour des tableaux : 
+        _mapStation pour le dernier message reçu par (station);
+        _mapStationMessage pour le dernier message reçu par le couple (station,type de message);
+      */
+    function updateStationInMapLDM( stationId, message) {
+     
+      var element1 = getStationInMapLDM( stationId);
+      if (element1 == null) {
+        _mapStation.push( { 'stationId': stationId, lastStamp: undefined, 'connected': true });
+        element1 = _mapStation[ _mapStation.length-1];
+        }
+      element1.lastStamp = new Date();
+      element1.connected = true;
+
+      var element2 = getStationAndMessageInMapLDM( stationId, message);
+      if (element2 == null) {
+        _mapStationMessage.push( { 'stationId': stationId, 'message': message, lastStamp: undefined});
+        element2 = _mapStationMessage[ _mapStationMessage.length-1];
+        }
+      element2.lastStamp = new Date();
+      }
+
+    /* loggue les évènement de début et de fin de com via le message LDM
+      */
+    const _seuilAlerteLDM = 10000;
+    function logLDMEvents( sChanel, jsn) {
+
+      if (_currentStationId == null) return;
+      if (jsn.stationid == undefined) return;
+      if (jsn.stationid == _currentStationId) return;
+
+      var jsnLog1 = null;
+      var now = new Date();
+      var elemStation = getStationInMapLDM( jsn.stationid);
+      if (elemStation == null) {
+        jsnLog1 = { 'lastStamp' : now, 'stationId': jsn.stationid, 'évenement': 'apparait' } ;
+        }
+      else {
+        var diffInMs = Math.abs( now.getTime() - elemStation.lastStamp.getTime());
+        if (diffInMs > _seuilAlerteLDM) {
+          jsnLog1 = { 'lastStamp' : now, 'stationId': elemStation.stationId, 'évenement': 're-apparait' } ;
+          }
+        }
+      if (jsnLog1 != null) {
+        var fullText = JSON.stringify( jsnLog1);
+        logInListLDMEvents( fullText);
+        }
+
+      var jsnLog2 = null;
+      var elemStationMessage = getStationAndMessageInMapLDM( jsn.stationid, jsn.messagetype);
+      if (elemStationMessage == null) {
+        jsnLog2 = { 'lastStamp' : now, 'stationId': jsn.stationid, 'évenement': 'début ' + jsn.messagetype } ;
+        }
+      else {
+        var diffInMs = Math.abs( now.getTime() - elemStationMessage.lastStamp.getTime());
+        if (diffInMs > _seuilAlerteLDM) {
+          jsnLog2 = { 'lastStamp' : now, 'stationId': elemStationMessage.stationId, 'évenement': 'début '+ jsn.messagetype } ;
+          }
+        }
+      if (jsnLog2 != null) {
+        var fullText = JSON.stringify( jsnLog2);
+        logInListLDMEvents( fullText);
+        }
+
+      updateStationInMapLDM( jsn.stationid, jsn.messagetype);
+
+      // setStationLDM( jsn.stationid, true);
+      }
+
+    /* ajoute les évènements debut/fin LDM dans une liste limitée en taille
+      */
+    function logInListLDMEvents( fullText) {
+      
+      $("#logLDMEvents")[0].options.add( new Option( fullText, "0"));
+			$("#logLDMEvents")[0].options.selectedIndex = $("#logLDMEvents")[0].options.length - 1;
+				
+      while( $("#logLDMEvents")[0].options.length > 500) {
+        $("#logLDMEvents")[0].options.remove(0);
+        }
+      }
+
+    /*
+      */
+    function scanLDMSStations() {
+      var now = new Date();
+      _mapStationMessage.forEach( function( elemStationMessage) {
+        var diffInMs = Math.abs( now.getTime() - elemStationMessage.lastStamp.getTime());
+        if (diffInMs > _seuilAlerteLDM
+          && isStationLDM( elemStationMessage.stationId)) {
+
+          jsnLog1 = { 'lastStamp' : now, 'stationId': elemStationMessage.stationId, 'évenement': 'fin ' + elemStationMessage.message } ;
+          var fullText = JSON.stringify( jsnLog1);
+          logInListLDMEvents( fullText);
+          }
+        });
+
+      _mapStation.forEach( function( elemStation) {
+        var diffInMs = Math.abs( now.getTime() - elemStation.lastStamp.getTime());
+        if (diffInMs > _seuilAlerteLDM
+          && isStationLDM( elemStation.stationId) ) {
+
+          jsnLog1 = { 'lastStamp' : now, 'stationId': elemStation.stationId, 'évenement': 'disparait' } ;
+          var fullText = JSON.stringify( jsnLog1);
+          logInListLDMEvents( fullText);
+
+          elemStation.connected = false;
+          }
+        });
+      }
+
+    /*
+      */
+    function clearEvenementsList(event) {
+      $("#logLDMEvents")[0].innerHTML = "";
+      }
+    
+    function clearLogList(event) {
+      $("#logList")[0].innerHTML = "";
+      }
+
+    /*
+      */
+    function listMapType_onchange(event) {
+      var selector = $("#listMapType")[0]
+      var value = selector[selector.selectedIndex].value;
+      for( var iMap=0; iMap < Object.keys(_mapLayers).length; iMap++) {
+        if (value != Object.keys(_mapLayers)[iMap]){
+          _mapLayers[ Object.keys(_mapLayers)[iMap] ].setVisible(false);
+          }
+        }
+      _mapLayers[ value].setVisible(true);
+      }
+
+    /* ZONES MANAGEMENT
+      
+    var _zones = [];
+    var _currentZone = null;
+    var _selectedZone = null;
+    var _currentLineLayer = null;
+    var _zoneStep = null;
+
+    A*
+      *A
+    function btnZonesClear_onclick(event) {
+      clearZones();
+      clearZonesDrawing();
+      clearCurrentZone();
+      }
+
+    A*
+      *A
+    function clearZones() {
+      _zones = [];
+      _zoneStep = null;
+      $("#idZoneId")[0].value = "";
+      $("#idZoneRegion")[0].value = "";
+      $("#idZoneSignalGroup")[0].value = "";
+      }
+
+    A*
+      *A
+    function btnZoneAdd_onclick(event) {
+      do {
+        _zoneStep = "createZone";
+
+        _currentZone = { 
+          "guid": newGuid(),
+          "id": 0, "region":0, 
+          "signal": 0, 
+          //"points": [], 
+          "routePoints": new Array()
+          //"linePoints": new Array()
+          };
+        }
+      while(false);
+      }   
+
+    A*
+      *A
+    function btnZoneValid_onclick(event) {
+      do {
+        if (_zoneStep != "createZone") break;
+        if (_currentZone == null) break;
+        
+        if (_currentZone.routePoints.length >= 3) {
+          // 
+          _currentZone.id = $("#idZoneId")[0].value;
+          _currentZone.region = $("#idZoneRegion")[0].value;
+          _currentZone.signal = $("#idZoneSignalGroup")[0].value;
+
+          // on reboucle
+          _currentZone.routePoints.push( _currentZone.routePoints[0]);
+          // supprime le layer temporaire
+          _currentLineLayer = clearLayer( _currentLineLayer);
+          // ajoute la zone
+          _zones.push( _currentZone);
+          }
+
+        clearCurrentZone();
+        _zoneStep = null;
+
+        drawZones();
+        }
+      while(false);
+      }
+
+    A*
+      *A
+    function btnZoneCancel_onclick(event) {
+      do {
+        clearCurrentZone();
+        _zoneStep = null;
+
+        drawZones();
+        }
+      while(false);
+      }
+
+    A*
+      *A
+    function btnZoneSup_onclick(event) {
+      do {
+        if (_selectedZone == null) break;
+        
+        var layer = getLayerFromZone( _selectedZone);
+        if (layer != null) {
+          layer = clearLayer( layer);
+          }
+        removeValueFromArray( _zones, _selectedZone);
+
+        $("#idZoneId")[0].value = "";
+        $("#idZoneRegion")[0].value = "";
+        $("#idZoneSignalGroup")[0].value = "";
+        }
+      while(false);
+      }
+    */
+
+    /* recharger de l'UBR le fichier spat_params
+      - en extraire les lignes de priorité
+      */
+    function btnLignesPrioReload_onclick(event) {
+      
+      sendHttpGetFile( "/spatModuleParamToDownload", "spat_mobile_params.xml", process_extractAndDrawLignesPrio);
+
+      return false;
+      }
+
+    /* se recentrer sur les lignes
+      */
+    function btnLignesPrioCenter_onclick( event) {
+
+      centerOnLines();
+      }
+    
+    /**/
+    function centerOnLines() {
+      /* dataLine = { 'Franchiss0' : Franchiss0, 'Franchiss1' : Franchiss1, 'AxeVehi0' : AxeVehi0, 'AxeVehi1': AxeVehi1};
+        _dataLines.push( dataLine);
+        */
+      _dataLines.forEach( function( dataLine) {
+        
+        var newLocation = [ dataLine['Franchiss0'][0], dataLine['Franchiss0'][1] ];
+        _map.getView().setCenter( ol.proj.transform( newLocation, 'EPSG:4326', 'EPSG:3857'));
+        return 1;
+        });
+      }
+
+    /*
+      
+    function btnZoneUpdate_onclick(event) {
+      do {
+        if (_selectedZone == null) break;
+        _selectedZone.id = $("#idZoneId")[0].value;
+        _selectedZone.region = $("#idZoneRegion")[0].value;;
+        _selectedZone.signal = $("#idZoneSignalGroup")[0].value;
+        }
+      while(false);
+      }*/
+
+    /*
+      
+    function clearCurrentZone() {
+      _currentZone = null;
+      _selectedZone = null;
+      _currentLineLayer = clearLayer( _currentLineLayer);
+      $("#idZoneId")[0].value = "";
+      $("#idZoneRegion")[0].value = "";
+      $("#idZoneSignalGroup")[0].value = "";
+      }*/
+    
+    /*
+      
+    var _layerZones = [];*/
+
+    /*
+    function clearZonesDrawing() {
+      for( var i=0; i < _layerZones.length; i++) {
+        _layerZones[i] = clearLayer( _layerZones[i]);
+        }
+      _layerZones = [];
+      }*/
+
+    /*
+      */
+    function clearLayer( xLayer) {
+      if (xLayer != null) {
+        if (xLayer.getSource() != null) {
+          xLayer.getSource().clear();
+          }
+          xLayer.setSource( null);
+        _map.removeLayer( xLayer);
+
+        xLayer = null;
+        }
+      return xLayer;
+      }
+
+    /*
+    function getLayerFromZone( zone) {
+      var report = null;
+      for( var i=0; i < _layerZones.length; i++) {
+        if (_layerZones[i].guid == zone.guid) {
+          report = _layerZones[i];
+          break;
+          }
+        }
+      return report;
+      }*/
+
+    /*
+      
+    function drawZones() {
+      clearZonesDrawing();
+
+      for( var i=0; i < _zones.length; i++) {
+        
+        var newLayer = drawZone( _zones[i], '#FF0000');
+        newLayer.guid = _zones[i].guid;
+
+        _layerZones.push( newLayer);
+        _map.addLayer( newLayer);
+        }
+      }*/
+      
+    /*
+      
+    function drawZone( aZone, strokeColor) {
+
+      var newLayer = null;
+
+      var points = [];
+      for (var i = 0; i < aZone.routePoints.length; i++) {
+        // LonLat to xy
+
+        points.push( ol.proj.transform( aZone.routePoints[i], 'EPSG:4326', 'EPSG:3857'));
+        }
+
+      var featureLine = new ol.Feature({
+        geometry: new ol.geom.LineString(points)
+        });
+
+      var vectorLine = new ol.source.Vector({});
+      vectorLine.addFeature( featureLine);
+
+      newLayer = new ol.layer.Vector({
+        source: vectorLine,
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({ color: strokeColor, weight: 4 }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: 1 })
+          })
+        });
+
+      return newLayer;
+      }*/
+
+    
+    /*
+     
+    $('#btnZonesSave').on('click', function(event) {      
+      dumpZones();
+      }); */
+
+    /*
+      
+    function dumpZones() {
+      var str = JSON.stringify(_zones);
+      var fileName = "nexo-zones-" + new Date().yyyymmddhhmmss() + ".json";
+      saveTextAsFile( str, fileName, ".json");
+      }*/
+
+    /*
+      
+    $('#btnZonesLoad').on('click', function(event) {      
+      
+      clearZones();
+      clearCurrentZone();
+
+      document.getElementById("procZonesLoad").value = "";
+      var chooser = document.querySelector('#procZonesLoad');
+      try {
+        chooser.removeEventListener("change", processJsonZones);
+        }
+      catch(err) {}
+			chooser.addEventListener( "change", processJsonZones, false);
+			chooser.click();
+      });*/
+    
+    /*
+      
+    function processJsonZones(evt) {
+			evt.stopPropagation();
+			evt.preventDefault();
+			processJsonZonesFile( evt.target.files[0]);
+      }*/
+
+    /*
+		function processJsonZonesFile( fileDescriptor) {
+			
+			var r = new FileReader();
+			r.onload = function(e) {
+				try {
+          _zones = JSON.parse( e.target.result);
+          for( var i=0; i < _zones.length; i++) {
+            if (_zones[i].guid == undefined) _zones[i].guid = newGuid();
+            }
+          drawZones();
+          }
+        catch(err) {
+          logInList( "echec du chargement : " + err);
+          }
+				}
+			r.readAsText( fileDescriptor, "text/plain;charset=utf-8");
+      }*/
+      
+    /* layer de dessin des lignes de priorité
+      */
+    var _layerLinePrio = [];
+
+    /*
+      */
+    function clearLinePrioLayers() {
+      for( var i=0; i < _layerLinePrio.length; i++) {
+        _layerLinePrio[i] = clearLayer( _layerLinePrio[i]);
+        }
+      _layerLinePrio = [];
+      }
+
+    /* data = { 'Franchiss0' : {'lat': float, 'lon': float }, 'Franchiss1': ..., 'AxeVehi0' : ..., 'AxeVehi1': ... }
+      */
+    function drawLinePrio( dataLine, strokeColor) {
+
+      var layerFranchiss = drawLine( dataLine.Franchiss0, dataLine.Franchiss1, strokeColor, dataLine.Nom + ": ligne de franchissement", dataLine, "franchissementLine");
+      var layerAxeVehi = drawLine( dataLine.AxeVehi0, dataLine.AxeVehi1, strokeColor, dataLine.Nom + ": direction", dataLine, "directionLine");
+
+      return { 'layerFranchiss' : layerFranchiss, 'layerAxeVehi' : layerAxeVehi };
+      }
+
+    /*
+      */
+    function drawLine( pointA, pointB, strokeColor, nom, dataLine, lineType) {
+
+      var newLayer = null;
+
+      var points = [];
+      points.push( ol.proj.transform( pointA, 'EPSG:4326', 'EPSG:3857'));
+      points.push( ol.proj.transform( pointB, 'EPSG:4326', 'EPSG:3857'));
+
+      var featureLine = new ol.Feature({
+        geometry: new ol.geom.LineString(points)
+        });
+
+      featureLine.featureType = lineType;
+      featureLine.set('name', nom);
+      featureLine.set('data', dataLine);
+
+      var vectorLine = new ol.source.Vector({});
+      vectorLine.addFeature( featureLine);
+      
+      newLayer = new ol.layer.Vector({
+        source: vectorLine,
+        visible: true,
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({ color: strokeColor, weight: 4 }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: 2 })
+          })
+        });
+
+      newLayer.set('name', nom);
+      newLayer.set('data', dataLine);
+
+      return newLayer;
+      }
+
+    /* modifier la ligne sélectionnée
+      */
+    var _stepModifLigne = null;
+
+    function btnLigneFranchissementModif_onclick( e ) {
+      do {
+        if (_stepModifLigne != "selected") break;
+
+        $("#LigneFranchissementPoint1").text("?");
+        $("#LigneFranchissementPoint2").text("?");
+        _dataLineModified = _dataLineSelected;
+        _stepModifLigne = "modif.franchissement.point1";
+        $("#btnLigneFranchissementModif")[0].disabled = true;
+        $("#btnLigneDirectionModif")[0].disabled = true;
+        $("#btnLignesDetectionValider")[0].disabled = true;
+        }
+      while(false);
+      }
+      
+    function btnLigneDirectionModif_onclick( e ) {
+      do {
+        if (_stepModifLigne != "selected") break;
+
+        $("#LigneDirectionPoint1").text("?");
+        $("#LigneDirectionPoint2").text("?");
+        _dataLineModified = _dataLineSelected;
+        _stepModifLigne = "modif.direction.point1";
+        $("#btnLigneFranchissementModif")[0].disabled = true;
+        $("#btnLigneDirectionModif")[0].disabled = true;
+        $("#btnLignesDetectionValider")[0].disabled = true;
+        }
+      while(false);
+      }
+
+    /**/
+    function btnLignesDetectionValider_onclick( e) {
+      do {
+        if (_dataLineModified == null) break;
+        if (_stepModifLigne != "selected") break;
+        if ($("#LigneFranchissementPoint1")[0].innerText == "?") break;
+        if ($("#LigneFranchissementPoint2")[0].innerText == "?") break;
+        if ($("#LigneDirectionPoint1")[0].innerText == "?") break;
+        if ($("#LigneDirectionPoint2")[0].innerText == "?") break;
+
+        var sNom =  $("#idLine_Nom").val();
+        var iRessNum = parseInt( $("#idLine_RessNum").val());
+        if (Number.isInteger(iRessNum) == false) {
+          logInList("la ressource n'est pas un entier.")
+          break;
+          }
+
+        _dataLineSelected.Nom = sNom;
+        _dataLineSelected.RessNum = iRessNum.toString();
+        _dataLineSelected = _dataLineModified;
+
+        drawLoadedLines();
+        }
+      while(false);
+      }
+
+    /* transfere les lignes de franchissement pour modifier le fichier spat_mobile_params.xml
+      */
+    function btnLignesDetectionSave_onclick( e) {
+      do {
+        if (_dataLines == null) break;
+
+        sendHttpPostJson( "/spatModuleParamUploadFranchissementLignes", 
+          _dataLines, 
+          "modification des lignes de franchissement", 
+          postProcessing_spatModuleParamUploadFranchissementLignes);
+        }
+      while(false);
+      }
+
+    /**/
+    function postProcessing_spatModuleParamUploadFranchissementLignes( requestDescription, httpResponseText) {
+
+      }
+
+    /*****
+     */
+    function wsOnOpen_UBR_WS (evt) {
+      wsOnOpen( evt,  "UBR_WS");
+      }
+    
+    /*****
+     */
+    function wsOnClose_UBR_WS( evt) {
+      wsOnClose( evt, "UBR_WS");
+      }
+
+
+    /*****
+     */
+    function wsOnError_UBR_WS(evt) {
+      wsOnError(evt,  "UBR_WS");
+      }
+
+    /*****
+     */
+    function timerRetry_UBR_WS( evt) { 
+      timerRetryCallback( evt, "UBR_WS");
+      }
+
+    /*****
+     */
+    function wsOnMessage_UBR_WS( evt) {
+
+      var sChanel = "UBR_WS";
+      var element = getWs( sChanel);
+      if (element.handle == null) return true;
+
+      element.lastMsgDate = new Date();
+      setChanelOperState( sChanel, element.lastMsgDate.yyyymmddhhmmssl());
+
+      setTimeout( processMessageUBR_WS, 10, sChanel, evt.data);
+      return true;
+      }
+
+    /***
+     */
+    var _diffPC_UBRinMs = 0;
+    var _LastNowUBR = null;
+    var _LastNowPC = null;
+    function processMessageUBR_WS( sChanel, strJson) {
+      try {
+        do {
+          var tmpJson = JSON.parse( strJson);
+          tmpJson = JSON.parse( tmpJson);
+              
+          var sMsgType = getFromPath( tmpJson, "context/MsgType");
+          var sTimeStamp = getFromPath( tmpJson, "context/TimeStamp");
+
+          if (sMsgType == 'horodate'
+            && sTimeStamp != null) {
+            
+            _LastNowUBR = new Date(sTimeStamp); 
+            _LastNowPC = new Date();
+            var diffInMs = Math.abs( _LastNowPC.getTime() - _LastNowUBR.getTime());
+            _diffPC_UBRinMs = diffInMs;
+            //logInList( 'diff=' + _diffPC_UBRinMs);
+
+            $('#idTimeOffset').text( diffInMs.toString());
+            }
+          }
+        while(false);
+        }
+      catch(err) {
+        var serr = err;
+        }
+      }
+
+    /* après lecture de la temperature par nodejs, utilisation
+      */
+    function temperaturePostProcessing(inValue) {
+      var outValue = inValue;
+      outValue = inValue.replace(/[\n\r]+/g, '');
+      $('#idTemperature')[0].value = outValue;
+      }
+
+  </script>
+</html>

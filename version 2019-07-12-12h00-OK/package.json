@@ -1,0 +1,26 @@
+{
+  "name": "nexomanager",
+  "version": "1.0.0",
+  "description": "maintenance of nexo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "f.pion-drancy@fareco.fayat.com",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "express": "^4.16.4",
+    "formidable": "^1.2.1",
+    "fs": "0.0.1-security",
+    "fs-copy-file": "^2.1.2",
+    "fs-extra": "^7.0.1",
+    "http": "0.0.0",
+    "https": "^1.0.0",
+    "path": "^0.12.7",
+    "simple-node-logger": "^18.12.21",
+    "url": "^0.11.0",
+    "websocket": "^1.0.28",
+    "xml2js": "^0.4.19"
+  }
+}

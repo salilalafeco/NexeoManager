@@ -1,0 +1,19 @@
+2019-02-22
+par FPI
+
+Supervision simple pour une équipe technique d'un UBR NEXO
+
+Mode d'emploi:
+==> Installer nodejs
+
+==> copier le répertoire NexoManager et son contenu dans :
+	/root/NexoManager
+
+==> lancer au démarrage, dans /root/NexoManager : nodejs index.js
+
+Utilisation:
+l'application nodejs index.js est lancé automatiquement au démarrage
+==> un serveur http est lancé
+
+==> depuis une interface web, URL : http://192.168.50.254:9080/accueil.html
+
